@@ -1,1 +1,930 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Homework 2: The 7 Powers of To Be (Deluxe Edition)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tone.js para Sonidos -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Nunito', 'sans-serif'],
+                        display: ['Fredoka', 'sans-serif']
+                    },
+                    colors: {
+                        hw: {
+                            bg: '#f8fafc',
+                            card: '#ffffff',
+                            text: '#334155',
+                            primary: '#8b5cf6', // Violet
+                            primaryDark: '#7c3aed',
+                            success: '#10b981',
+                            error: '#f43f5e',
+                            warning: '#f59e0b'
+                        },
+                        // Colores temáticos por misión
+                        m1: '#0ea5e9', // Sky (Identity)
+                        m2: '#f43f5e', // Rose (Age)
+                        m3: '#10b981', // Emerald (Origin)
+                        m4: '#f59e0b', // Amber (Jobs)
+                        m5: '#8b5cf6', // Violet (Feelings)
+                        m6: '#3b82f6', // Blue (Location)
+                        m7: '#d946ef'  // Fuchsia (Description)
+                    },
+                    boxShadow: {
+                        'btn': '0 6px 0px rgba(0,0,0,0.15)',
+                        'btn-active': '0 0px 0px rgba(0,0,0,0.15)',
+                        'card': '0 10px 30px -5px rgba(0,0,0,0.08)',
+                        'floating': '0 20px 40px -10px rgba(0,0,0,0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base & Reset */
+        body { 
+            background-color: #cbd5e1; /* Gris fondo PC */
+            color: #334155; 
+            margin: 0; padding: 0; 
+            display: flex; justify-content: center; 
+            min-height: 100vh; overflow-x: hidden; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        
+        /* Mobile Container (App-like feel) */
+        .app-container { 
+            width: 100%; max-width: 480px; 
+            background: #f1f5f9; min-height: 100vh; 
+            position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.2); 
+            display: flex; flex-direction: column; overflow-x: hidden; 
+        }
+
+        /* Views System */
+        .view-section { display: none; flex-direction: column; width: 100%; min-height: 100vh; }
+        .view-section.active { display: flex; animation: fadeIn 0.4s ease; }
+
+        /* Interactive Buttons (Game style) */
+        .btn-press { 
+            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.1s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s; 
+            cursor: pointer; 
+            position: relative;
+        }
+        .btn-press:active, .btn-press.is-pressed { 
+            box-shadow: var(--tw-shadow-btn-active) !important; 
+            transform: translateY(6px) !important; 
+        }
+        .btn-press:disabled { 
+            opacity: 0.6; cursor: not-allowed; 
+            box-shadow: none !important; transform: none !important; 
+        }
+
+        /* Progress Bar */
+        .progress-bar-container { width: 100%; background-color: rgba(255,255,255,0.3); border-radius: 999px; height: 10px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background-color: #ffffff; border-radius: 999px; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); width: 0%; }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 60% { transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes shake { 10%, 90% { transform: translateX(-2px); } 20%, 80% { transform: translateX(4px); } 30%, 50%, 70% { transform: translateX(-6px); } 40%, 60% { transform: translateX(6px); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        
+        .pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .slide-up { animation: slideUp 0.6s ease-out forwards; }
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        .floating { animation: float 3s ease-in-out infinite; }
+
+        /* Mission Cards in Hub */
+        .mission-card { transition: all 0.3s; border: 2px solid transparent; }
+        .mission-card:hover:not(.locked):not(.completed) { border-color: #cbd5e1; transform: translateY(-2px); }
+        .mission-card.locked { filter: grayscale(100%); opacity: 0.7; pointer-events: none; }
+        .mission-card.completed { border-color: #10b981; background-color: #ecfdf5; }
+        .mission-card.completed .mission-icon { background-color: #10b981; color: white; }
+
+        /* Confetti Canvas */
+        #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+        
+        /* Glassmorphism */
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<div class="app-container">
+
+    <!-- GLOBAL HEADER (Sticky) -->
+    <header class="sticky top-0 z-50 glass px-5 py-4 flex items-center justify-between border-b border-slate-200 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 bg-hw-primary text-white rounded-full flex items-center justify-center font-black text-xl shadow-btn btn-press" onclick="returnToHub()">
+                K
+            </div>
+            <div>
+                <h1 class="font-display font-bold text-lg leading-tight text-slate-800">Homework 2</h1>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">7 Powers of To Be</p>
+            </div>
+        </div>
+        <div class="flex gap-2 items-center">
+            <button onclick="toggleAudio()" id="btn-audio" class="w-10 h-10 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center btn-press shadow-btn transition-colors">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <div id="xp-badge" class="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-full text-sm font-black flex items-center gap-1 border border-indigo-200 shadow-sm transition-transform duration-300">
+                ⭐ <span id="global-xp">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- =========================================================================
+         VIEW: MISSION HUB (Home)
+         ========================================================================= -->
+    <div id="view-hub" class="view-section active pb-12">
+        <div class="p-5">
+            <!-- Hero Banner -->
+            <div class="bg-gradient-to-br from-hw-primary to-hw-primaryDark rounded-[2rem] p-8 text-white shadow-floating relative overflow-hidden mb-8 slide-up">
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
+                <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-black opacity-10 rounded-full blur-2xl"></div>
+                
+                <span class="text-6xl absolute bottom-0 right-2 opacity-50 transform -rotate-12 floating">🦸‍♀️</span>
+                <h2 class="font-display text-4xl font-bold mb-3 relative z-10 leading-tight">The<br>7 Powers</h2>
+                <p class="text-indigo-100 font-medium leading-relaxed relative z-10 text-sm max-w-[75%]">
+                    El verbo <strong>To Be</strong> tiene 7 "superpoderes". Completa el entrenamiento para obtener tu certificado maestro.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-2 mb-4 px-2">
+                <i class="fas fa-map-signs text-slate-400"></i>
+                <h3 class="font-bold text-slate-600 uppercase tracking-widest text-xs">Mission Map</h3>
+            </div>
+
+            <!-- Listado de Misiones inyectado por JS -->
+            <div class="space-y-4" id="mission-list">
+                <!-- JS Content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         VIEW: DYNAMIC MISSION STAGE
+         ========================================================================= -->
+    <div id="view-mission" class="view-section bg-slate-50">
+        
+        <!-- Mission Top Header (Dynamic Color) -->
+        <div id="mission-header-bg" class="bg-m1 text-white p-5 pb-10 rounded-b-[2.5rem] shadow-md transition-colors duration-500">
+            <button onclick="returnToHub()" class="text-white/80 font-bold mb-4 flex items-center gap-2 hover:text-white bg-white/10 px-4 py-2 rounded-full w-max backdrop-blur-sm transition-colors">
+                <i class="fas fa-arrow-left"></i> Hub
+            </button>
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 id="mission-title" class="font-display text-3xl font-bold mb-1">Title</h2>
+                    <p id="mission-subtitle" class="text-white/80 text-sm font-medium">Subtitle</p>
+                </div>
+                <div id="mission-icon-large" class="text-5xl opacity-80"></div>
+            </div>
+
+            <!-- Quiz Progress Bar (Hidden in Lesson mode) -->
+            <div id="mission-progress-container" class="mt-6 hidden">
+                <div class="flex justify-between text-xs font-bold text-white/80 mb-2">
+                    <span>Progress</span>
+                    <span id="mission-progress-text">0/4</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="mission-progress-fill" class="progress-bar-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="p-5 -mt-6 flex-1 flex flex-col pb-24">
+            
+            <!-- LESSON CONTAINER -->
+            <div id="lesson-container" class="bg-white p-6 md:p-8 rounded-[2rem] shadow-card border border-slate-100 flex-1 flex flex-col relative pop-in">
+                <div class="absolute -top-4 right-6 bg-amber-400 text-amber-900 text-xs font-black px-3 py-1 rounded-full shadow-sm uppercase tracking-widest border border-amber-300">
+                    Mini Lesson
+                </div>
+                <div id="lesson-content" class="flex-1 text-slate-600 prose prose-slate">
+                    <!-- JS Content -->
+                </div>
+                <button onclick="startMissionQuiz()" class="w-full mt-8 bg-slate-900 text-white font-bold text-xl py-4 rounded-xl shadow-btn btn-press flex items-center justify-center gap-2">
+                    Start Challenge <i class="fas fa-play"></i>
+                </button>
+            </div>
+
+            <!-- QUIZ CONTAINER -->
+            <div id="quiz-container" class="bg-white p-6 md:p-8 rounded-[2rem] shadow-card border border-slate-100 flex-1 flex flex-col items-center justify-center hidden">
+                <!-- JS Content -->
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- =========================================================================
+         VIEW: FINAL CERTIFICATE
+         ========================================================================= -->
+    <div id="view-victory" class="view-section bg-slate-900 justify-center p-5 text-center relative overflow-hidden">
+        <!-- Decoration -->
+        <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 20px 20px;"></div>
+        
+        <div class="bg-white p-8 rounded-[3rem] shadow-card relative border-4 border-hw-primary overflow-hidden max-w-sm mx-auto w-full z-10">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-purple-100 rounded-full blur-2xl"></div>
+            
+            <div class="relative z-10 flex flex-col items-center">
+                <div class="w-24 h-24 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center text-5xl mb-6 shadow-floating pop-in border-4 border-white">
+                    🏆
+                </div>
+                
+                <h2 class="font-display text-3xl font-black text-slate-800 mb-2 pop-in" style="animation-delay: 0.1s">To Be Master</h2>
+                <p class="text-slate-500 font-bold mb-6 pop-in text-sm" style="animation-delay: 0.2s">Kaeren has successfully unlocked the 7 powers of the verb To Be.</p>
+                
+                <div class="bg-indigo-50 w-full p-6 rounded-3xl border-2 border-indigo-100 mb-6 pop-in relative overflow-hidden" style="animation-delay: 0.3s">
+                    <div class="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] font-black px-2 py-1 rounded-bl-lg uppercase">Score</div>
+                    <p class="text-indigo-400 font-bold uppercase tracking-widest text-xs mb-1">Total XP Earned</p>
+                    <p id="cert-score" class="text-6xl font-black text-hw-primary tracking-tighter">0</p>
+                </div>
+
+                <div class="bg-amber-50 text-amber-800 p-4 rounded-2xl border border-amber-200 font-bold text-sm flex gap-3 text-left pop-in" style="animation-delay: 0.4s">
+                    <span class="text-2xl">📸</span>
+                    <p>¡Tómale captura de pantalla a este certificado y envíaselo a tu teacher!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =========================================================================
+         MODAL FEEDBACK (Bottom Sheet Style)
+         ========================================================================= -->
+    <div id="feedback-modal" class="fixed inset-0 z-[100] flex flex-col justify-end hidden pointer-events-none">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] transition-opacity opacity-0" id="feedback-overlay"></div>
+        
+        <div class="bg-white rounded-t-[2.5rem] p-6 pb-8 shadow-[0_-10px_40px_rgba(0,0,0,0.2)] transform translate-y-full transition-transform duration-300 ease-out pointer-events-auto border-t-8 relative z-10" id="feedback-sheet">
+            <div class="flex items-start gap-4 mb-4">
+                <div id="fb-icon" class="w-14 h-14 rounded-full flex items-center justify-center text-3xl font-black flex-shrink-0 shadow-sm"></div>
+                <div>
+                    <h3 id="fb-title" class="font-display text-2xl font-bold mb-1"></h3>
+                    <p id="fb-msg" class="text-slate-600 font-medium text-base leading-snug"></p>
+                </div>
+            </div>
+            
+            <!-- Explanation Box (Only for errors usually) -->
+            <div id="fb-explanation-box" class="bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-6 hidden">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1"><i class="fas fa-lightbulb text-amber-500"></i> Recuerda</p>
+                <p id="fb-explanation-text" class="text-slate-700 font-bold text-sm"></p>
+            </div>
+
+            <button id="fb-btn" class="w-full text-white font-bold text-xl py-4 rounded-2xl shadow-btn btn-press uppercase tracking-wide">
+                Continuar
+            </button>
+        </div>
+    </div>
+
+</div> <!-- End App Container -->
+
+<script>
+    // ==========================================
+    // ESTADO GLOBAL Y AUDIO
+    // ==========================================
+    let globalXP = 0;
+    let audioEnabled = false; // Requiere interacción inicial por políticas de navegador
+    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+    
+    let currentMissionId = null;
+    let currentMissionStep = 0;
+    let currentMissionScore = 0;
+
+    // Sonidos
+    function playSound(type) {
+        if(!audioEnabled && type !== 'pop') return; // Pop inicial permitido silencioso o intenta
+        if(Tone.context.state !== 'running') Tone.context.resume();
+        const now = Tone.now();
+        try {
+            if (type === 'success') synth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "8n", now);
+            else if (type === 'error') synth.triggerAttackRelease(["C3", "Eb3"], "8n", now);
+            else if (type === 'pop') synth.triggerAttackRelease("C5", "32n", now);
+            else if (type === 'win') synth.triggerAttackRelease(["C4", "E4", "G4", "C5", "E5"], "2n", now);
+        } catch(e) {}
+    }
+
+    function speakText(text) {
+        if(!audioEnabled) return;
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.85;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function toggleAudio() {
+        audioEnabled = !audioEnabled;
+        const btn = document.getElementById('btn-audio');
+        if(audioEnabled) {
+            btn.innerHTML = '<i class="fas fa-volume-up"></i>';
+            btn.classList.add('bg-indigo-100', 'text-hw-primary');
+            playSound('pop');
+        } else {
+            btn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            btn.classList.remove('bg-indigo-100', 'text-hw-primary');
+        }
+    }
+
+    function addXP(amount) {
+        globalXP += amount;
+        document.getElementById('global-xp').innerText = globalXP;
+        const badge = document.getElementById('xp-badge');
+        badge.classList.add('scale-110', 'bg-green-100', 'border-green-300', 'text-green-700');
+        setTimeout(() => badge.classList.remove('scale-110', 'bg-green-100', 'border-green-300', 'text-green-700'), 300);
+    }
+
+    function switchView(viewId) {
+        document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+
+    // ==========================================
+    // DATA STRUCTURE (MISSIONS + LESSONS + QUIZ)
+    // ==========================================
+    
+    // Status global de misiones (true = completada)
+    const missionsStatus = [false, false, false, false, false, false, false]; 
+
+    const missionsConfig = {
+        1: { title: 'Identity', subtitle: 'Who are you?', icon: '🪪', colorBg: 'bg-m1', colorHex: '#0ea5e9' },
+        2: { title: 'Age', subtitle: 'How old are you?', icon: '🎂', colorBg: 'bg-m2', colorHex: '#f43f5e' },
+        3: { title: 'Origin', subtitle: 'Where from?', icon: '🌎', colorBg: 'bg-m3', colorHex: '#10b981' },
+        4: { title: 'Jobs', subtitle: 'Occupations', icon: '👩‍⚕️', colorBg: 'bg-m4', colorHex: '#f59e0b' },
+        5: { title: 'Feelings', subtitle: 'States of mind', icon: '🥵', colorBg: 'bg-m5', colorHex: '#8b5cf6' },
+        6: { title: 'Location', subtitle: 'Where is it?', icon: '📍', colorBg: 'bg-m6', colorHex: '#3b82f6' },
+        7: { title: 'Description', subtitle: 'What is it like?', icon: '✨', colorBg: 'bg-m7', colorHex: '#d946ef' }
+    };
+
+    const missionData = {
+        1: {
+            lessonHTML: `
+                <h3 class="text-2xl font-black text-slate-800 mb-4">1. Identity (Identidad)</h3>
+                <p class="mb-4">El superpoder principal del <strong>To Be</strong> es decir <strong class="text-m1">quiénes somos</strong>.</p>
+                <div class="bg-sky-50 p-4 rounded-xl border border-sky-100 mb-4">
+                    <ul class="space-y-2 font-bold text-slate-700">
+                        <li><span class="text-m1">I am</span> Kaeren. (Yo soy)</li>
+                        <li><span class="text-m1">He is</span> my brother. (Él es)</li>
+                        <li><span class="text-m1">They are</span> my friends. (Ellos son)</li>
+                    </ul>
+                </div>
+                <p class="text-sm font-bold text-slate-500"><i class="fas fa-info-circle"></i> Tip: Recuerda que <strong class="text-slate-700">is</strong> es para singulares (1) y <strong class="text-slate-700">are</strong> para plurales (2+).</p>
+            `,
+            questions: [
+                { type: 'fill', q: "I <span id='q-gap'>___</span> Kaeren.", opts: ['am', 'is', 'are'], ans: 0, reason: "Con 'I' siempre usamos 'am'." },
+                { type: 'fill', q: "He <span id='q-gap'>___</span> Carlos.", opts: ['am', 'is', 'are'], ans: 1, reason: "Carlos es 'He' (Él), así que usamos 'is'." },
+                { type: 'fill', q: "We <span id='q-gap'>___</span> students.", opts: ['am', 'is', 'are'], ans: 2, reason: "'We' (Nosotros) es plural, usamos 'are'." },
+                { type: 'fill', q: "My dogs <span id='q-gap'>___</span> big.", opts: ['is', 'are'], ans: 1, reason: "Los perros (dogs) son plurales (They), por lo tanto usamos 'are'." }
+            ]
+        },
+        2: {
+            lessonHTML: `
+                <h3 class="text-2xl font-black text-slate-800 mb-4">2. Age (Edad)</h3>
+                <div class="bg-rose-100 text-rose-800 p-4 rounded-xl border border-rose-200 mb-4 font-bold flex gap-3">
+                    <span class="text-2xl">🚨</span>
+                    <p>¡ALERTA! En inglés <strong class="text-rose-900">NO tenemos años</strong> (I have). En inglés <strong class="text-rose-900">SOMOS</strong> de cierta edad (I am).</p>
+                </div>
+                <ul class="space-y-3 font-bold text-slate-700">
+                    <li class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> I am 25 years old.</li>
+                    <li class="flex items-center gap-2"><i class="fas fa-times text-red-500"></i> <del>I have 25 years</del>.</li>
+                </ul>
+            `,
+            questions: [
+                { type: 'choice', title: '¿Cómo dices "Tengo 20 años"?', opts: ['I have 20 years old.', 'I am 20 years old.'], ans: 1, reason: "¡Recuerda la regla de oro! Eres tus años, no los tienes." },
+                { type: 'choice', title: '¿Cómo dices "Ella tiene 15"?', opts: ['She is 15.', 'She has 15.'], ans: 0, reason: "Con ella (She) usamos 'is' para la edad." },
+                { type: 'fill', q: "My brother <span id='q-gap'>___</span> 10 years old.", opts: ['has', 'is', 'are'], ans: 1, reason: "Tu hermano es 'He' (Él). Usamos 'is' para decir su edad." },
+                { type: 'true_false', q: "La frase 'My dog has 3 years' es correcta.", ans: false, reason: "Falso. Lo correcto es 'My dog IS 3 years old'." }
+            ]
+        },
+        3: {
+            lessonHTML: `
+                <h3 class="text-2xl font-black text-slate-800 mb-4">3. Origin (Origen)</h3>
+                <p class="mb-4">Para decir de dónde eres, junta el To Be con la palabra <strong class="text-m3 bg-emerald-100 px-2 py-1 rounded">from</strong>.</p>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <p class="font-bold text-lg text-slate-700 text-center">To Be + from + País/Ciudad</p>
+                </div>
+                <ul class="mt-4 space-y-2 font-bold text-slate-600">
+                    <li>I <span class="text-m3">am from</span> Mexico.</li>
+                    <li>They <span class="text-m3">are from</span> Japan.</li>
+                </ul>
+            `,
+            questions: [
+                { type: 'fill', q: "I <span id='q-gap'>___</span> from Colombia.", opts: ['am', 'is', 'are'], ans: 0, reason: "Para 'I' (Yo) usamos 'am'." },
+                { type: 'fill', q: "Where <span id='q-gap'>___</span> you from?", opts: ['am', 'is', 'are'], ans: 2, reason: "Para 'You' (Tú/Ustedes) siempre usamos 'are'." },
+                { type: 'choice', title: '¿Cómo dices "Él es de Canadá"?', opts: ['He are from Canada.', 'He is from Canada.'], ans: 1, reason: "'He' es singular, necesita 'is'." },
+                { type: 'fill', q: "Shakira and Juanes <span id='q-gap'>___</span> from Colombia.", opts: ['is', 'are'], ans: 1, reason: "Shakira y Juanes son dos personas (They / Ellos). Usamos 'are'." }
+            ]
+        },
+        4: {
+            lessonHTML: `
+                <h3 class="text-2xl font-black text-slate-800 mb-4">4. Jobs (Profesiones)</h3>
+                <p class="mb-4">¡Otro error común! En inglés no puedes decir "Soy doctor". Tienes que decir "Soy <strong class="text-m4">un</strong> doctor".</p>
+                <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 font-bold text-slate-700">
+                    <p class="text-center text-lg mb-2">To Be + <span class="text-m4 bg-white px-2 rounded shadow-sm">a / an</span> + Profesión</p>
+                    <ul class="text-sm mt-3 space-y-2">
+                        <li><i class="fas fa-star text-amber-500"></i> I am <span class="text-m4">a</span> teacher.</li>
+                        <li><i class="fas fa-star text-amber-500"></i> She is <span class="text-m4">an</span> engineer (empieza con vocal).</li>
+                    </ul>
+                </div>
+            `,
+            questions: [
+                { type: 'choice', title: '¿Cuál es correcta?', opts: ['I am doctor.', 'I am a doctor.'], ans: 1, reason: "En inglés siempre necesitas decir 'a/an' antes de la profesión si es singular." },
+                { type: 'fill', q: "He <span id='q-gap'>___</span> a police officer.", opts: ['am', 'is', 'are'], ans: 1, reason: "He (Él) requiere 'is'." },
+                { type: 'choice', title: 'Si son plurales no usamos a/an:', opts: ['We are a teachers.', 'We are teachers.'], ans: 1, reason: "'a' significa UNO. Si somos varios (teachers), no usamos 'a'." },
+                { type: 'fill', q: "My mom <span id='q-gap'>___</span> an architect.", opts: ['is', 'are'], ans: 0, reason: "Mi mamá (She) usa 'is'." }
+            ]
+        },
+        5: {
+            lessonHTML: `
+                <h3 class="text-2xl font-black text-slate-800 mb-4">5. Feelings (Estados)</h3>
+                <p class="mb-4">Para decir cómo te sientes física o mentalmente, usamos To Be.</p>
+                <div class="grid grid-cols-2 gap-3 text-center font-bold text-slate-700 mb-4">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">I am hungry 🤤</div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">She is cold 🥶</div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">We are tired 😴</div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">He is scared 😱</div>
+                </div>
+                <p class="text-sm font-bold text-m5 bg-purple-50 p-3 rounded-lg"><i class="fas fa-exclamation-triangle"></i> Igual que la edad, NO "tenemos" hambre o frío en inglés. ESTAMOS hambrientos o fríos.</p>
+            `,
+            questions: [
+                { type: 'choice', title: '¿Cómo dices "Tengo hambre"?', opts: ['I have hungry.', 'I am hungry.'], ans: 1, reason: "El hambre no se posee en inglés. Estás en un estado de hambre -> I am hungry." },
+                { type: 'fill', q: "The kids <span id='q-gap'>___</span> tired.", opts: ['is', 'are'], ans: 1, reason: "Los niños (kids) son plurales. Usamos 'are'." },
+                { type: 'choice', title: 'Mi perro tiene sed (thirsty):', opts: ['My dog has thirsty.', 'My dog is thirsty.'], ans: 1, reason: "Aplica para todos: no usamos 'have' para sensaciones corporales." },
+                { type: 'fill', q: "I <span id='q-gap'>___</span> very happy today!", opts: ['am', 'is', 'are'], ans: 0, reason: "Con I (Yo) siempre va 'am'." }
+            ]
+        },
+        6: {
+            lessonHTML: `
+                <h3 class="text-2xl font-black text-slate-800 mb-4">6. Location (Ubicación)</h3>
+                <p class="mb-4">El verbo To Be también significa <strong>ESTAR</strong>. Lo usamos para decir dónde están las cosas o personas.</p>
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 font-bold text-slate-700">
+                    <ul class="space-y-3">
+                        <li>📍 I <span class="text-m6">am</span> at home. (Yo estoy)</li>
+                        <li>📍 The keys <span class="text-m6">are</span> on the table. (Las llaves están)</li>
+                        <li>📍 Paris <span class="text-m6">is</span> in France. (París está)</li>
+                    </ul>
+                </div>
+            `,
+            questions: [
+                { type: 'fill', q: "The book <span id='q-gap'>___</span> on the desk.", opts: ['is', 'are'], ans: 0, reason: "El libro (book) es singular (It). Usamos 'is'." },
+                { type: 'fill', q: "My parents <span id='q-gap'>___</span> at work.", opts: ['is', 'are'], ans: 1, reason: "Mis padres (parents) son dos personas o más (They). Usamos 'are'." },
+                { type: 'choice', title: '¿Dónde está el gato?', opts: ['The cat is in the box.', 'The cat are in the box.'], ans: 0, reason: "El gato es singular." },
+                { type: 'fill', q: "We <span id='q-gap'>___</span> in the restaurant.", opts: ['am', 'is', 'are'], ans: 2, reason: "We (Nosotros) siempre usa 'are'." }
+            ]
+        },
+        7: {
+            lessonHTML: `
+                <h3 class="text-2xl font-black text-slate-800 mb-4">7. Description (Descripción)</h3>
+                <p class="mb-4">Finalmente, usamos To Be para describir colores, tamaños o personalidad de cosas y personas.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-fuchsia-50 p-4 rounded-2xl border border-fuchsia-200 text-center">
+                        <span class="text-4xl block mb-2">🐘</span>
+                        <p class="font-bold">The elephant <span class="text-m7">is</span> big.</p>
+                    </div>
+                    <div class="bg-fuchsia-50 p-4 rounded-2xl border border-fuchsia-200 text-center">
+                        <span class="text-4xl block mb-2">🏎️🏎️</span>
+                        <p class="font-bold">The cars <span class="text-m7">are</span> fast.</p>
+                    </div>
+                </div>
+            `,
+            questions: [
+                { type: 'fill', q: "My car <span id='q-gap'>___</span> red.", opts: ['is', 'are'], ans: 0, reason: "Un solo coche (It). Usamos 'is'." },
+                { type: 'fill', q: "These apples <span id='q-gap'>___</span> delicious.", opts: ['is', 'are'], ans: 1, reason: "Las manzanas (apples) son plurales. Usamos 'are'." },
+                { type: 'choice', title: 'La película es muy buena:', opts: ['The movie are very good.', 'The movie is very good.'], ans: 1, reason: "La película (movie) es una sola." },
+                { type: 'true_false', q: "'My shoes is black'. ¿Es correcto?", ans: false, reason: "Falso. Los zapatos (shoes) son plural. Debería ser 'My shoes ARE black'." }
+            ]
+        }
+    };
+
+    // ==========================================
+    // UI LOGIC: HUB & MISSIONS
+    // ==========================================
+
+    function renderHub() {
+        const list = document.getElementById('mission-list');
+        list.innerHTML = '';
+
+        Object.keys(missionsConfig).forEach(key => {
+            const id = parseInt(key);
+            const m = missionsConfig[id];
+            
+            const isCompleted = missionsStatus[id - 1];
+            // Bloqueado si el anterior no está completado (id > 1)
+            const isLocked = id > 1 && !missionsStatus[id - 2];
+            
+            let statusClass = '';
+            if (isCompleted) statusClass = 'completed';
+            else if (isLocked) statusClass = 'locked';
+
+            const card = document.createElement('div');
+            card.className = `mission-card bg-white p-4 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer btn-press ${statusClass}`;
+            
+            // Icon container bg
+            const iconBg = isCompleted ? 'bg-hw-success' : m.colorBg;
+            
+            card.innerHTML = `
+                <div class="${iconBg} mission-icon w-14 h-14 rounded-[1.2rem] flex items-center justify-center text-2xl shadow-sm text-white flex-shrink-0">
+                    ${isCompleted ? '<i class="fas fa-check"></i>' : (isLocked ? '<i class="fas fa-lock"></i>' : m.icon)}
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-display font-bold text-xl text-slate-800">${id}. ${m.title}</h3>
+                    <p class="text-sm font-medium text-slate-500">${m.subtitle}</p>
+                </div>
+                ${!isLocked && !isCompleted ? `<div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-bold"><i class="fas fa-chevron-right"></i></div>` : ''}
+            `;
+            
+            if(!isLocked && !isCompleted) {
+                card.onclick = () => {
+                    // Start Audio Context on first interactive click if not active
+                    if(Tone.context.state !== 'running') { Tone.context.resume(); audioEnabled = true; document.getElementById('btn-audio').innerHTML = '<i class="fas fa-volume-up"></i>'; document.getElementById('btn-audio').classList.add('bg-indigo-100', 'text-hw-primary'); }
+                    openMission(id);
+                };
+            }
+            
+            list.appendChild(card);
+        });
+
+        // Revisar Victoria Global
+        if(missionsStatus.every(s => s === true)) {
+            setTimeout(showVictory, 800);
+        }
+    }
+
+    function returnToHub() {
+        playSound('pop');
+        switchView('view-hub');
+        renderHub();
+    }
+
+
+    function openMission(id) {
+        currentMissionId = id;
+        currentMissionStep = 0;
+        currentMissionScore = 0;
+        
+        const mConfig = missionsConfig[id];
+        const data = missionData[id];
+        
+        // Setup Header
+        document.getElementById('mission-header-bg').className = `${mConfig.colorBg} text-white p-5 pb-10 rounded-b-[2.5rem] shadow-md transition-colors duration-500`;
+        document.getElementById('mission-title').innerText = `${id}. ${mConfig.title}`;
+        document.getElementById('mission-subtitle').innerText = mConfig.subtitle;
+        document.getElementById('mission-icon-large').innerText = mConfig.icon;
+
+        // Hide Quiz stuff, Show Lesson stuff
+        document.getElementById('mission-progress-container').classList.add('hidden');
+        document.getElementById('quiz-container').classList.add('hidden');
+        document.getElementById('lesson-container').classList.remove('hidden');
+        
+        // Inject Lesson HTML
+        document.getElementById('lesson-content').innerHTML = data.lessonHTML;
+        
+        // Trigger animation
+        const lessonBox = document.getElementById('lesson-container');
+        lessonBox.classList.remove('pop-in');
+        void lessonBox.offsetWidth;
+        lessonBox.classList.add('pop-in');
+
+        playSound('pop');
+        switchView('view-mission');
+    }
+
+    function startMissionQuiz() {
+        playSound('pop');
+        document.getElementById('lesson-container').classList.add('hidden');
+        document.getElementById('mission-progress-container').classList.remove('hidden');
+        document.getElementById('quiz-container').classList.remove('hidden');
+        
+        renderQuizStep();
+    }
+
+
+    function renderQuizStep() {
+        const mData = missionData[currentMissionId];
+        const qData = mData.questions[currentMissionStep];
+        const container = document.getElementById('quiz-container');
+        const mConfig = missionsConfig[currentMissionId];
+
+        // Update Progress Bar
+        const total = mData.questions.length;
+        document.getElementById('mission-progress-text').innerText = `${currentMissionStep}/${total}`;
+        document.getElementById('mission-progress-fill').style.width = `${(currentMissionStep / total) * 100}%`;
+
+        // Reflow Animation
+        container.classList.remove('pop-in');
+        void container.offsetWidth;
+        container.classList.add('pop-in');
+
+        // Render based on Question Type
+        if(qData.type === 'fill') {
+            container.innerHTML = `
+                <h4 class="text-3xl font-black text-slate-700 text-center mb-8 leading-relaxed w-full">
+                    ${qData.q}
+                </h4>
+                <div class="flex gap-3 w-full flex-wrap justify-center">
+                    ${qData.opts.map((opt, idx) => `
+                        <button onclick="handleAnswer(${idx}, ${qData.ans}, '${opt}')" 
+                                class="flex-1 min-w-[100px] py-4 bg-slate-100 text-slate-700 font-black text-xl rounded-2xl border-b-4 border-slate-200 hover:bg-slate-200 btn-press">
+                            ${opt}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        } 
+        else if (qData.type === 'choice') {
+            container.innerHTML = `
+                <h4 class="text-2xl font-black text-slate-700 text-center mb-8 leading-snug w-full">
+                    ${qData.title}
+                </h4>
+                <div class="flex flex-col gap-4 w-full">
+                    ${qData.opts.map((opt, idx) => `
+                        <button onclick="handleAnswer(${idx}, ${qData.ans})" 
+                                class="w-full py-5 px-5 bg-slate-50 text-slate-700 font-bold text-lg rounded-2xl border-2 border-slate-200 hover:bg-slate-100 btn-press text-left flex items-center justify-between">
+                            <span>${opt}</span>
+                            <div class="w-6 h-6 rounded-full border-2 border-slate-300"></div>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        }
+        else if (qData.type === 'true_false') {
+            container.innerHTML = `
+                <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center text-4xl mb-6 shadow-sm">🧐</div>
+                <h4 class="text-2xl font-black text-slate-700 text-center mb-8 leading-snug w-full">
+                    ${qData.q}
+                </h4>
+                <div class="flex gap-4 w-full">
+                    <button onclick="handleAnswer(true, ${qData.ans})" class="flex-1 py-5 bg-green-50 text-green-700 font-black text-xl rounded-2xl border-2 border-green-200 hover:bg-green-100 btn-press">
+                        TRUE
+                    </button>
+                    <button onclick="handleAnswer(false, ${qData.ans})" class="flex-1 py-5 bg-red-50 text-red-700 font-black text-xl rounded-2xl border-2 border-red-200 hover:bg-red-100 btn-press">
+                        FALSE
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+
+    function handleAnswer(selectedValue, correctValue, fillText = null) {
+        const isCorrect = selectedValue === correctValue;
+        const qData = missionData[currentMissionId].questions[currentMissionStep];
+        const mConfig = missionsConfig[currentMissionId];
+        
+        // Fill Visual Update if needed
+        if(fillText && isCorrect) {
+            const gap = document.getElementById('q-gap');
+            if(gap) {
+                gap.innerText = fillText;
+                gap.className = "inline-block text-hw-success font-black border-b-4 border-hw-success px-2 mx-1";
+            }
+        }
+
+        // Leer la oración completa si fue 'fill' o 'choice' y es correcta
+        if(isCorrect) {
+            if(qData.type === 'fill' || qData.type === 'choice') {
+                let textToRead = '';
+                if(qData.type === 'fill') {
+                    textToRead = qData.q.replace(/<span.*<\/span>/, fillText);
+                } else if (qData.type === 'choice') {
+                    textToRead = qData.opts[correctValue];
+                }
+                setTimeout(() => speakText(textToRead.replace(/<[^>]*>?/gm, '')), 400); // Quitar HTML tags
+            }
+        }
+
+        // Configurar y mostrar el Smart Feedback Sheet
+        const modal = document.getElementById('feedback-modal');
+        const overlay = document.getElementById('feedback-overlay');
+        const sheet = document.getElementById('feedback-sheet');
+        const icon = document.getElementById('fb-icon');
+        const title = document.getElementById('fb-title');
+        const msg = document.getElementById('fb-msg');
+        const explBox = document.getElementById('fb-explanation-box');
+        const explText = document.getElementById('fb-explanation-text');
+        const btn = document.getElementById('fb-btn');
+
+        modal.classList.remove('hidden');
+        // Force Reflow
+        void modal.offsetWidth; 
+        overlay.classList.remove('opacity-0');
+        sheet.classList.remove('translate-y-full');
+
+        if(isCorrect) {
+            playSound('success');
+            currentMissionScore += 10;
+            addXP(10);
+            
+            sheet.className = "bg-white rounded-t-[2.5rem] p-6 pb-8 shadow-floating transform transition-transform duration-300 ease-out pointer-events-auto border-t-8 border-hw-success relative z-10";
+            icon.className = "w-14 h-14 rounded-full flex items-center justify-center text-3xl font-black flex-shrink-0 shadow-sm bg-green-100 text-hw-success";
+            icon.innerHTML = '<i class="fas fa-check"></i>';
+            title.innerText = "¡Excelente!";
+            title.className = "font-display text-2xl font-bold mb-1 text-hw-success";
+            msg.innerText = "Respuesta correcta.";
+            explBox.classList.add('hidden'); // Ocultar explicación en correcto para flujo rápido
+            
+            btn.className = "w-full text-white font-bold text-xl py-4 rounded-2xl shadow-btn btn-press uppercase tracking-wide bg-hw-success hover:bg-green-600";
+            
+        } else {
+            playSound('error');
+            
+            sheet.className = "bg-white rounded-t-[2.5rem] p-6 pb-8 shadow-floating transform transition-transform duration-300 ease-out pointer-events-auto border-t-8 border-hw-error relative z-10";
+            icon.className = "w-14 h-14 rounded-full flex items-center justify-center text-3xl font-black flex-shrink-0 shadow-sm bg-red-100 text-hw-error";
+            icon.innerHTML = '<i class="fas fa-times"></i>';
+            title.innerText = "Ups, casi...";
+            title.className = "font-display text-2xl font-bold mb-1 text-hw-error";
+            msg.innerText = "Veamos qué pasó.";
+            
+            explText.innerHTML = qData.reason || "Revisa la regla gramatical de esta misión.";
+            explBox.classList.remove('hidden'); // Mostrar explicación inteligente
+            
+            btn.className = "w-full text-white font-bold text-xl py-4 rounded-2xl shadow-btn btn-press uppercase tracking-wide bg-hw-error hover:bg-red-600";
+        }
+
+        // Botón Continuar Lógica
+        btn.onclick = () => {
+            overlay.classList.add('opacity-0');
+            sheet.classList.add('translate-y-full');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                
+                if(isCorrect) {
+                    currentMissionStep++;
+                    const totalQ = missionData[currentMissionId].questions.length;
+                    
+                    if(currentMissionStep >= totalQ) {
+                        completeMission();
+                    } else {
+                        renderQuizStep();
+                    }
+                }
+                // Si es incorrecto, no avanza (Retry)
+            }, 300);
+        };
+    }
+
+    function completeMission() {
+        missionsStatus[currentMissionId - 1] = true;
+        
+        // Update Progress Bar fully
+        document.getElementById('mission-progress-fill').style.width = `100%`;
+        
+        // Reward Bonus XP
+        addXP(50);
+        playSound('win');
+
+        // Show Mission Complete Overlay (Re-using Feedback modal with custom styles)
+        const modal = document.getElementById('feedback-modal');
+        const overlay = document.getElementById('feedback-overlay');
+        const sheet = document.getElementById('feedback-sheet');
+        
+        modal.classList.remove('hidden');
+        void modal.offsetWidth; 
+        overlay.classList.remove('opacity-0');
+        sheet.classList.remove('translate-y-full');
+
+        const mConfig = missionsConfig[currentMissionId];
+        
+        sheet.style.borderColor = mConfig.colorHex;
+        document.getElementById('fb-icon').className = `w-14 h-14 rounded-full flex items-center justify-center text-3xl font-black flex-shrink-0 shadow-sm text-white ${mConfig.colorBg}`;
+        document.getElementById('fb-icon').innerHTML = "⭐";
+        
+        const title = document.getElementById('fb-title');
+        title.innerText = "Mission Complete!";
+        title.style.color = mConfig.colorHex;
+        
+        document.getElementById('fb-msg').innerText = `Has dominado el poder: ${mConfig.title}.`;
+        document.getElementById('fb-explanation-box').classList.add('hidden');
+        
+        const btn = document.getElementById('fb-btn');
+        btn.className = `w-full text-white font-bold text-xl py-4 rounded-2xl shadow-btn btn-press uppercase tracking-wide ${mConfig.colorBg}`;
+        
+        btn.onclick = () => {
+            // Clean up custom inline styles
+            sheet.style.borderColor = '';
+            title.style.color = '';
+            
+            overlay.classList.add('opacity-0');
+            sheet.classList.add('translate-y-full');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                returnToHub();
+            }, 300);
+        };
+    }
+
+    function showVictory() {
+        playSound('win');
+        switchView('view-victory');
+        document.getElementById('cert-score').innerText = globalXP;
+        
+        // Trigger Confetti
+        triggerConfetti();
+    }
+
+
+    // ==========================================
+    // CONFETTI SYSTEM
+    // ==========================================
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animId;
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas(); // init
+
+    class Particle {
+        constructor() {
+            this.x = canvas.width / 2;
+            this.y = canvas.height / 2 + 100; // Salen desde el centro abajo
+            this.vx = (Math.random() - 0.5) * 25; // Explosión ancha
+            this.vy = (Math.random() - 1) * 25 - 5; // Hacia arriba
+            this.size = Math.random() * 12 + 6;
+            this.color = ['#0ea5e9', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#d946ef', '#fbbf24'][Math.floor(Math.random() * 7)];
+            this.rotation = Math.random() * 360;
+            this.rotationSpeed = (Math.random() - 0.5) * 15;
+            this.shape = Math.random() > 0.5 ? 'rect' : 'circle';
+        }
+        update() {
+            this.vy += 0.6; // Gravedad
+            this.vx *= 0.98; // Fricción
+            this.x += this.vx;
+            this.y += this.vy;
+            this.rotation += this.rotationSpeed;
+        }
+        draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate((this.rotation * Math.PI) / 180);
+            ctx.fillStyle = this.color;
+            if(this.shape === 'rect') {
+                ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+            } else {
+                ctx.beginPath();
+                ctx.arc(0, 0, this.size/2, 0, Math.PI*2);
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+    }
+
+    function triggerConfetti() {
+        for(let i=0; i<180; i++) particles.push(new Particle());
+        if(!animId) animateConfetti();
+    }
+
+    function animateConfetti() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for(let i = particles.length -1; i >= 0; i--) {
+            let p = particles[i];
+            p.update();
+            p.draw();
+            if(p.y > canvas.height + 50) particles.splice(i, 1); // Kill off-screen
+        }
+        if(particles.length > 0) {
+            animId = requestAnimationFrame(animateConfetti);
+        } else {
+            animId = null; // Detener bucle
+        }
+    }
+
+
+    // ==========================================
+    // INITIALIZATION
+    // ==========================================
+    window.onload = () => {
+        renderHub();
+    };
+
+</script>
+</body>
+</html>
