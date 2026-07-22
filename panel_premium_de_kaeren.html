@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaeren Classes | Teacher Netza</title>
+    
+    <!-- Tailwind CSS para la estructura responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome para iconos modernos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts (Inter para lectura & Nunito para títulos amigables) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Script de configuración inicial para evitar parpadeos de tema -->
+    <script>
+        if (localStorage.theme === 'light' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+            document.documentElement.classList.remove('dark')
+            document.documentElement.classList.add('light')
+        } else {
+            document.documentElement.classList.add('dark')
+            document.documentElement.classList.remove('light')
+        }
+    </script>
+
+    <style>
+        /* ==========================================
+           🎨 VARIABLES DE TEMA (MODO CLARO Y OSCURO)
+           ========================================== */
+        :root {
+            /* Modo Oscuro (Por defecto) - Paleta Cálida y Amigable */
+            --bg-body: #17101c; /* Fondo morado muy oscuro */
+            --bg-card: rgba(30, 24, 43, 0.7);
+            --bg-card-hover: rgba(45, 33, 63, 0.9);
+            --text-main: #fdf2f8;
+            --text-muted: #a1a1aa;
+            --accent-primary: #ec4899; /* Rosa vibrante */
+            --accent-secondary: #8b5cf6; /* Morado suave */
+            --border-color: rgba(236, 72, 153, 0.15);
+            --glow-color: rgba(236, 72, 153, 0.4);
+            
+            /* Fondos animados */
+            --blob-1: #ec4899;
+            --blob-2: #f43f5e; /* Rosa coral */
+        }
+
+        html.light {
+            /* Modo Claro - Paleta Suave y Dulce */
+            --bg-body: #fff1f2; /* Fondo rosa ultra claro */
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --bg-card-hover: rgba(255, 255, 255, 1);
+            --text-main: #4c1d95; /* Morado oscuro para contraste */
+            --text-muted: #71717a;
+            --accent-primary: #db2777; /* Rosa oscuro */
+            --accent-secondary: #7c3aed; /* Morado vibrante */
+            --border-color: rgba(219, 39, 119, 0.15);
+            --glow-color: rgba(219, 39, 119, 0.3);
+            
+            --blob-1: #fbcfe8; /* Rosa pastel */
+            --blob-2: #fce7f3; /* Rosa más claro */
+        }
+
+        /* ==========================================
+           🚀 ESTILOS GLOBALES
+           ========================================== */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background-color 0.5s ease, color 0.5s ease;
+            position: relative;
+        }
+
+        h1, h2, h3, h4, .font-nunito {
+            font-family: 'Nunito', sans-serif;
+        }
+
+        /* ==========================================
+           ✨ EFECTOS DE FONDO (BLOBS)
+           ========================================== */
+        .bg-blobs {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .blob {
+            position: absolute;
+            filter: blur(90px);
+            opacity: 0.35;
+            border-radius: 50%;
+            animation: float 22s infinite alternate ease-in-out;
+            transition: background-color 0.5s ease;
+        }
+
+        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background-color: var(--blob-1); }
+        .blob-2 { bottom: -10%; right: -10%; width: 45vw; height: 45vw; background-color: var(--blob-2); animation-delay: -11s; }
+
+        /* ==========================================
+           💎 COMPONENTES GLASSMORPHISM & CARTAS
+           ========================================== */
+        .glass-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .block-card.available {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .block-card.available:hover {
+            transform: translateY(-8px) scale(1.02);
+            background: var(--bg-card-hover);
+            border-color: var(--accent-primary);
+            box-shadow: 0 15px 30px -5px var(--glow-color);
+        }
+
+        .block-card.available::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent);
+            transform: skewX(-25deg);
+            transition: all 0.75s ease;
+        }
+        
+        .block-card.available:hover::before {
+            left: 125%;
+        }
+
+        .block-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+            filter: grayscale(0.6); /* Un poco menos gris para mantenerlo amigable */
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ==========================================
+           🎬 ANIMACIONES KEYFRAMES
+           ========================================== */
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(40px, 60px) rotate(15deg); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseSoft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .animate-fade-in-up { animation: fadeInUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .animate-pulse-soft { animation: pulseSoft 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+        /* Estilos del iframe interactivo */
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            border-radius: 16px; /* Bordes más redondeados */
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+        .iframe-container iframe {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+        }
+
+        /* Inputs y Botones */
+        .input-glass {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+        .input-glass:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--glow-color);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Fondos dinámicos -->
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <!-- Navegación superior -->
+    <nav class="w-full glass-panel sticky top-0 z-50 border-b-0 border-x-0 border-t-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <!-- Icono más suave y amigable -->
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pink-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl shadow-lg transform rotate-3">
+                        <i class="fa-solid fa-face-smile-beam"></i>
+                    </div>
+                    <span class="font-nunito font-bold text-lg tracking-wide hidden sm:block">Teacher Netza</span>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <span class="text-sm font-medium opacity-80 border-r border-gray-400 pr-4">Portal de Kaeren ✨</span>
+                    <!-- Botón de Modo Oscuro/Claro -->
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-500/20 transition-colors" title="Cambiar Tema">
+                        <i id="theme-icon" class="fa-solid fa-moon text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        
+        <!-- HEADER HERO -->
+        <header class="text-center mb-12 animate-fade-in-up">
+            <div class="inline-block px-5 py-1.5 rounded-full border border-pink-500/30 bg-pink-500/10 text-pink-500 font-bold text-sm mb-4">
+                🌟 Espacio de Aprendizaje Exclusivo
+            </div>
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 font-nunito">
+                Welcome to <br class="md:hidden"/> <span class="text-gradient">Kaeren Classes</span>
+            </h1>
+            <p class="text-lg md:text-xl font-medium" style="color: var(--text-muted)">
+                Everything you need to master English, organized and ready for you.
+            </p>
+        </header>
+
+        <!-- PIZARRÓN INTERACTIVO -->
+        <section class="mb-16 animate-fade-in-up delay-100">
+            <div class="glass-panel rounded-[2rem] p-6 md:p-8 relative">
+                <div class="flex flex-col md:flex-row items-center gap-4 mb-6 text-center md:text-left">
+                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl text-white shadow-lg" style="background: linear-gradient(135deg, #FF9A9E, #FECFEF)">
+                        <i class="fa-solid fa-person-chalkboard text-pink-600"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black font-nunito">Class Whiteboard</h2>
+                        <p class="text-sm font-medium mt-1" style="color: var(--text-muted)">Live presentation and class notes</p>
+                    </div>
+                </div>
+                <!-- Iframe actualizado a /embed con la URL de Kaeren -->
+                <div class="iframe-container shadow-2xl">
+                    <iframe 
+                        src="https://docs.google.com/presentation/d/1sGAb9p5Kbze82DBESK-Ws2p-gAtAM5lFUejt1Tc7aIQ/embed?start=false&loop=false&delayms=3000" 
+                        allowfullscreen="true" 
+                        mozallowfullscreen="true" 
+                        webkitallowfullscreen="true">
+                    </iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- ÁREA DINÁMICA: Bloques o Lista de Lecciones -->
+        <section id="dynamic-content-area" class="min-h-[400px] relative animate-fade-in-up delay-200">
+            
+            <!-- VIEW 1: GRID DE BLOQUES -->
+            <div id="blocks-view" class="block">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl text-white shadow-md" style="background: linear-gradient(135deg, #34D399, #10B981)">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold font-nunito">Learning Blocks</h2>
+                        <p class="text-sm" style="color: var(--text-muted)">Select a block to explore your lessons</p>
+                    </div>
+                </div>
+
+                <!-- Grid de carpetas -->
+                <div id="blocks-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Los bloques se renderizan por JS -->
+                    <div class="col-span-full text-center py-12 animate-pulse-soft">
+                        <i class="fa-solid fa-spinner fa-spin text-4xl mb-4" style="color: var(--accent-primary)"></i>
+                        <p class="font-medium text-lg">Buscando lecciones en la nube...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: LISTA DE LECCIONES DENTRO DE UN BLOQUE -->
+            <div id="lessons-view" class="hidden">
+                <button id="btn-back" class="mb-6 px-5 py-2.5 rounded-xl glass-panel hover:bg-gray-500/20 flex items-center gap-2 font-bold transition-colors">
+                    <i class="fa-solid fa-arrow-left-long"></i> Volver a los Bloques
+                </button>
+
+                <div class="glass-panel p-6 md:p-8 rounded-[2rem] mb-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                        <div>
+                            <h2 id="current-block-title" class="text-3xl font-black text-gradient font-nunito">Bloque X</h2>
+                            <p class="text-sm mt-2 font-medium" style="color: var(--text-muted)">Select any lesson to review the content.</p>
+                        </div>
+                        
+                        <!-- Buscador -->
+                        <div class="relative w-full md:w-80">
+                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2" style="color: var(--text-muted)"></i>
+                            <input type="text" id="search-input" class="w-full pl-12 pr-4 py-3 rounded-2xl input-glass transition-all font-medium" placeholder="Buscar tema o fecha...">
+                        </div>
+                    </div>
+
+                    <div id="lessons-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Las lecciones se insertan aquí -->
+                    </div>
+                </div>
+            </div>
+            
+        </section>
+    </main>
+
+    <footer class="mt-auto border-t glass-panel border-b-0 border-x-0 py-10">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h3 class="font-nunito font-black text-2xl mb-3 text-gradient">Keep learning, Kaeren! ✨</h3>
+            <p class="mb-6 font-medium" style="color: var(--text-muted)">"The beautiful thing about learning is that nobody can take it away from you."</p>
+            <div class="flex items-center justify-center gap-3 text-sm opacity-80 font-semibold">
+                <span class="bg-gray-500/10 px-3 py-1 rounded-lg">Designed for Kaeren</span>
+                <span>•</span>
+                <span>Created by Teacher Netza <i class="fa-solid fa-heart text-pink-500 ml-1"></i></span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ==========================================
+        // ⚙️ CONFIGURACIÓN DE GITHUB (Repositorio de Kaeren)
+        // ==========================================
+        const CONFIG = {
+            usuario: 'teachernetza',
+            repositorio: 'kaeren-class' // <-- Ajustado al repo de Kaeren
+        };
+
+        // Estado Global de la App
+        const appState = {
+            // Estructura de bloques. Iconos más amigables.
+            blocks: [
+                { id: 'bloque-1', name: 'Bloque 1', folderMatch: 'bloque 1', icon: 'fa-book-heart', backupIcon: 'fa-book-open', data: [] },
+                { id: 'bloque-2', name: 'Bloque 2', folderMatch: 'bloque 2', icon: 'fa-star', backupIcon: 'fa-star', data: [] },
+                { id: 'bloque-3', name: 'Bloque 3', folderMatch: 'bloque 3', icon: 'fa-paper-plane', backupIcon: 'fa-paper-plane', data: [] },
+                { id: 'bloque-4', name: 'Bloque 4', folderMatch: 'bloque 4', icon: 'fa-crown', backupIcon: 'fa-crown', data: [] }
+            ],
+            currentBlockId: null,
+            filteredLessons: []
+        };
+
+        // ==========================================
+        // 🌓 LOGICA DEL TEMA (MODO CLARO/OSCURO)
+        // ==========================================
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const htmlElement = document.documentElement;
+
+        function updateThemeIcon() {
+            if (htmlElement.classList.contains('dark')) {
+                themeIcon.className = 'fa-solid fa-sun text-yellow-400 text-xl';
+            } else {
+                themeIcon.className = 'fa-solid fa-moon text-purple-600 text-xl';
+            }
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                htmlElement.classList.add('light');
+                localStorage.theme = 'light';
+            } else {
+                htmlElement.classList.remove('light');
+                htmlElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+            updateThemeIcon();
+        });
+        updateThemeIcon(); // Inicializar icono
+
+        // ==========================================
+        // 📡 CONSUMO DE API GITHUB Y PROCESAMIENTO
+        // ==========================================
+        async function fetchGitHubData() {
+            const url = `https://api.github.com/repos/${CONFIG.usuario}/${CONFIG.repositorio}/git/trees/HEAD?recursive=1`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Repositorio no encontrado o vacío.');
+                
+                const data = await response.json();
+                
+                // Filtramos solo archivos HTML
+                const htmlFiles = data.tree.filter(item => item.type === 'blob' && item.path.endsWith('.html') && item.path !== 'index.html');
+
+                // Clasificamos los archivos en los bloques
+                htmlFiles.forEach(file => {
+                    const lowerPath = file.path.toLowerCase();
+                    const targetBlock = appState.blocks.find(b => lowerPath.includes(b.folderMatch));
+                    
+                    if (targetBlock) {
+                        const fileName = file.path.split('/').pop();
+                        const parsedData = parseLessonData(fileName, file.path);
+                        targetBlock.data.push(parsedData);
+                    }
+                });
+
+                // Ordenar las clases de cada bloque (las más nuevas primero)
+                appState.blocks.forEach(block => {
+                    block.data.sort((a, b) => b.rawDate.localeCompare(a.rawDate));
+                });
+
+                renderBlocks();
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('blocks-grid').innerHTML = `
+                    <div class="col-span-full glass-panel p-8 rounded-2xl border-red-500 text-center">
+                        <i class="fa-solid fa-triangle-exclamation text-5xl text-red-400 mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-2 font-nunito">Oopss...</h3>
+                        <p style="color: var(--text-muted)">No pudimos cargar los archivos. Verifica que el repositorio "${CONFIG.repositorio}" exista y tengas al menos una carpeta de Bloque creada con una lección.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function parseLessonData(fileName, fullPath) {
+            // Asume formato: YYYY-MM-DD-Nombre-Del-Tema.html
+            const regex = /^(\d{4}-\d{2}-\d{2})-(.+)\.html$/;
+            const match = fileName.match(regex);
+            
+            let formattedDate = "Lesson Material";
+            let topic = fileName.replace('.html', '').replace(/-/g, ' ');
+            let rawDate = "0000-00-00";
+
+            if (match) {
+                rawDate = match[1];
+                let topicRaw = match[2];
+                topic = topicRaw.replace(/-/g, ' ');
+
+                const [year, month, day] = rawDate.split('-');
+                const dateObj = new Date(year, month - 1, day);
+                formattedDate = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            }
+
+            return {
+                title: topic,
+                date: formattedDate,
+                rawDate: rawDate,
+                url: `./${fullPath}`
+            };
+        }
+
+        // ==========================================
+        // 🖼️ RENDERIZADO DE LA INTERFAZ
+        // ==========================================
+        
+        function renderBlocks() {
+            const container = document.getElementById('blocks-grid');
+            container.innerHTML = '';
+
+            appState.blocks.forEach((block, index) => {
+                const count = block.data.length;
+                const isAvailable = count > 0;
+                
+                const card = document.createElement('div');
+                card.className = `glass-panel rounded-3xl p-7 flex flex-col h-full animate-fade-in-up delay-${(index+1)*100} block-card ${isAvailable ? 'available border-pink-500/30' : 'locked'}`;
+                
+                if (isAvailable) {
+                    card.onclick = () => openBlock(block.id);
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="w-16 h-16 rounded-2xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-3xl shadow-sm" style="color: var(--accent-primary)">
+                            <i class="fa-solid ${block.backupIcon}"></i>
+                        </div>
+                        ${isAvailable 
+                            ? `<span class="px-4 py-1.5 text-xs font-black rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 uppercase tracking-wide">Disponible</span>`
+                            : `<span class="px-4 py-1.5 text-xs font-black rounded-full bg-gray-500/20 text-gray-400 border border-gray-500/30 uppercase tracking-wide"><i class="fa-solid fa-lock mr-1"></i> Muy pronto</span>`
+                        }
+                    </div>
+                    <h3 class="text-2xl font-black mb-2 font-nunito tracking-tight">${block.name}</h3>
+                    <p class="text-sm mb-6 flex-grow font-medium" style="color: var(--text-muted)">
+                        ${isAvailable ? `¡Genial! Tienes ${count} lecciones disponibles para revisar aquí.` : `El material para este bloque aún no se ha publicado. ¡Paciencia!`}
+                    </p>
+                    ${isAvailable ? `
+                        <div class="mt-auto font-black text-sm flex items-center gap-2 uppercase tracking-wide" style="color: var(--accent-secondary)">
+                            Abrir carpeta <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-2"></i>
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ==========================================
+        // 🔄 NAVEGACIÓN Y BÚSQUEDA DENTRO DE CARPETAS
+        // ==========================================
+
+        const viewBlocks = document.getElementById('blocks-view');
+        const viewLessons = document.getElementById('lessons-view');
+        const searchInput = document.getElementById('search-input');
+
+        function openBlock(blockId) {
+            appState.currentBlockId = blockId;
+            const block = appState.blocks.find(b => b.id === blockId);
+            
+            document.getElementById('current-block-title').textContent = block.name;
+            appState.filteredLessons = [...block.data]; 
+            searchInput.value = ''; 
+            
+            renderLessons();
+            
+            viewBlocks.classList.add('hidden');
+            viewLessons.classList.remove('hidden');
+            viewLessons.classList.add('animate-fade-in-up');
+        }
+
+        document.getElementById('btn-back').addEventListener('click', () => {
+            appState.currentBlockId = null;
+            viewLessons.classList.add('hidden');
+            viewBlocks.classList.remove('hidden');
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const block = appState.blocks.find(b => b.id === appState.currentBlockId);
+            
+            appState.filteredLessons = block.data.filter(lesson => 
+                lesson.title.toLowerCase().includes(query) || 
+                lesson.date.toLowerCase().includes(query)
+            );
+            
+            renderLessons();
+        });
+
+        function renderLessons() {
+            const container = document.getElementById('lessons-grid');
+            container.innerHTML = '';
+
+            if (appState.filteredLessons.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-16 bg-black/5 rounded-2xl border border-dashed border-gray-500/30">
+                        <div class="text-5xl mb-4 opacity-50">🔍</div>
+                        <h4 class="font-nunito font-bold text-xl mb-1">No hay coincidencias</h4>
+                        <p class="text-sm opacity-70">Intenta buscar con otras palabras.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            appState.filteredLessons.forEach((lesson, index) => {
+                const card = document.createElement('a');
+                card.href = lesson.url;
+                card.className = `glass-panel rounded-2xl p-6 block transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[var(--glow-color)] group animate-fade-in-up delay-${(index%4)*100} border-2 border-transparent hover:border-[var(--accent-primary)]`;
+                
+                card.innerHTML = `
+                    <div class="text-xs font-black uppercase tracking-widest mb-3" style="color: var(--accent-primary)">
+                        <i class="fa-regular fa-calendar-check mr-1"></i> ${lesson.date}
+                    </div>
+                    <h4 class="text-xl font-bold mb-4 font-nunito group-hover:text-[var(--accent-secondary)] transition-colors leading-tight">${lesson.title}</h4>
+                    <div class="flex items-center text-sm font-bold opacity-60 group-hover:opacity-100 transition-opacity mt-4 pt-4 border-t border-gray-500/20">
+                        <span class="mr-2">Ver Lección</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ==========================================
+        // 🚀 INICIALIZACIÓN
+        // ==========================================
+        fetchGitHubData();
+
+    </script>
+</body>
+</html>
