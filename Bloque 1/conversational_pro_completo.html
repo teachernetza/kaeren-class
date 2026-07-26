@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- Prevents pinch-to-zoom scaling for a native app feel -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Homework: Verb To Be Mastery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            touch-action: manipulation; 
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Animations */
+        .slide-enter { animation: slideUpFade 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .pulse-soft { animation: pulseSoft 2.5s infinite ease-in-out; }
+        @keyframes pulseSoft {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bounce-slight { animation: bounceSlight 2s infinite ease-in-out; }
+        @keyframes bounceSlight {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Custom Scrollbar for better UX on desktop */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Utilities */
+        .text-gradient-blue { background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-image: linear-gradient(to right, #2563eb, #06b6d4); }
+        
+        /* Custom Select to ensure consistent look across iOS and Android */
+        select.custom-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1.2em;
+            padding-right: 2rem !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-[100dvh] w-full overflow-hidden flex flex-col selection:bg-blue-200 selection:text-blue-900">
+
+    <header class="h-16 md:h-20 bg-white border-b border-slate-200 flex items-center justify-between px-3 md:px-8 shrink-0 z-30 shadow-sm relative">
+        <div class="flex items-center gap-2 md:gap-3">
+            <div class="w-9 h-9 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <i class="fas fa-pencil-alt text-white text-base md:text-xl"></i>
+            </div>
+            <div class="hidden sm:block">
+                <h1 class="text-lg md:text-xl font-black text-slate-800 tracking-tight leading-none">English<span class="text-blue-600">Task</span></h1>
+                <p class="text-xs text-slate-500 font-bold mt-0.5">The Verb To Be</p>
+            </div>
+        </div>
+        
+        <div class="flex flex-col items-center w-1/2 md:w-1/3">
+            <span class="text-[10px] md:text-xs text-slate-500 font-bold uppercase tracking-wider mb-1 md:mb-1.5" id="progress-text">Cargando...</span>
+            <div class="w-full h-2 md:h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200 shadow-inner">
+                <div id="progress-bar" class="h-full bg-gradient-to-r from-sky-400 to-blue-600 transition-all duration-500 w-0 relative rounded-full"></div>
+            </div>
+        </div>
+
+        <button onclick="toggleDictionary()" class="flex items-center gap-1.5 md:gap-2 bg-sky-50 text-sky-700 hover:bg-sky-100 px-3 py-1.5 md:px-5 md:py-2.5 rounded-xl font-bold transition-colors text-xs md:text-sm border border-sky-100 shadow-sm bounce-slight">
+            <i class="fas fa-book-open"></i> <span class="hidden sm:inline">Diccionario</span>
+        </button>
+    </header>
+
+    <main class="flex-1 overflow-y-auto relative p-4 md:p-8 flex flex-col items-center bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-fixed" id="main-scroll-area">
+        
+        <div id="slides-container" class="w-full max-w-5xl mx-auto pb-16 md:pb-24">
+            
+            <div class="slide slide-enter text-center mt-4 md:mt-12">
+                <div class="inline-block p-5 md:p-6 rounded-full bg-white mb-4 md:mb-6 border border-slate-100 shadow-xl pulse-soft">
+                    <span class="text-6xl md:text-8xl">📝</span>
+                </div>
+                <h2 class="text-3xl sm:text-4xl md:text-7xl font-black mb-4 md:mb-6 tracking-tight text-slate-800 leading-tight">
+                    Homework: <br class="md:hidden" />
+                    <span class="text-gradient-blue">Verb To Be</span>
+                </h2>
+                <p class="text-base sm:text-lg md:text-2xl text-slate-600 mb-8 md:mb-10 max-w-3xl mx-auto font-medium px-2 md:px-4 leading-relaxed">
+                    Completa esta tarea interactiva enfocada <strong>exclusivamente en el Verbo To Be (Ser/Estar)</strong>. Aprenderás a afirmar, negar, preguntar e interpretar conversaciones reales.
+                </p>
+                <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl max-w-lg mx-auto mb-8 md:mb-10 font-bold text-blue-800 flex items-start sm:items-center gap-3 sm:gap-4 text-left shadow-sm">
+                    <i class="fas fa-info-circle text-2xl md:text-3xl text-blue-500 mt-0.5 sm:mt-0 shrink-0"></i>
+                    <p class="text-xs sm:text-sm md:text-base leading-snug">Si no conoces una palabra, abre el <span class="bg-white px-1.5 py-0.5 rounded text-sky-600 shadow-sm whitespace-nowrap"><i class="fas fa-book-open text-xs"></i> Diccionario</span> en la parte superior derecha.</p>
+                </div>
+                <button onclick="nextSlide()" class="w-full sm:w-auto px-8 md:px-12 py-4 md:py-5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-600 text-white rounded-xl md:rounded-2xl font-black text-lg md:text-xl transition-all shadow-lg shadow-blue-600/30 hover:-translate-y-1">
+                    Comenzar Tarea <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+
+            <div class="slide hidden slide-enter">
+                <div class="mb-6 md:mb-8 text-center">
+                    <span class="bg-blue-100 text-blue-700 text-xs md:text-sm font-black px-4 py-1.5 rounded-full uppercase tracking-wider">Lesson 1</span>
+                    <h2 class="text-3xl md:text-5xl font-black text-slate-800 mt-4 leading-tight">Afirmaciones</h2>
+                    <p class="text-slate-600 text-base md:text-lg mt-3 md:mt-4 max-w-2xl mx-auto">Usamos <strong class="bg-blue-100 text-blue-800 px-2 rounded">Am, Is, Are</strong> para hablar de identidad, profesiones, sentimientos, ubicaciones y edad.</p>
+                </div>
+                
+                <div class="bg-white p-5 md:p-8 rounded-2xl md:rounded-3xl border border-slate-200 shadow-xl mb-8">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div class="bg-slate-50 p-5 rounded-2xl border-t-4 border-blue-500 shadow-sm relative group hover:shadow-md transition">
+                            <button onclick="playAudio(event, 'I am a friendly person.')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center hover:bg-blue-200 transition cursor-pointer z-10">
+                                <i class="fas fa-volume-up text-sm"></i>
+                            </button>
+                            <span class="text-4xl block mb-2">🙋‍♂️</span>
+                            <h3 class="font-black text-2xl text-slate-800 mb-2">I <span class="text-blue-600">am</span></h3>
+                            <p class="text-slate-600 font-medium text-sm md:text-base">I <span class="text-blue-500 font-bold">am</span> a friendly person. 😊</p>
+                        </div>
+                        <div class="bg-slate-50 p-5 rounded-2xl border-t-4 border-rose-500 shadow-sm relative group hover:shadow-md transition">
+                            <button onclick="playAudio(event, 'She is smart and funny.')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-200 transition cursor-pointer z-10">
+                                <i class="fas fa-volume-up text-sm"></i>
+                            </button>
+                            <span class="text-4xl block mb-2">👩‍🦰</span>
+                            <h3 class="font-black text-2xl text-slate-800 mb-2">He/She/It <span class="text-rose-500">is</span></h3>
+                            <p class="text-slate-600 font-medium text-sm md:text-base">She <span class="text-rose-500 font-bold">is</span> smart and funny. 🧠</p>
+                        </div>
+                        <div class="bg-slate-50 p-5 rounded-2xl border-t-4 border-emerald-500 shadow-sm relative group hover:shadow-md transition">
+                            <button onclick="playAudio(event, 'We are nervous today.')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center hover:bg-emerald-200 transition cursor-pointer z-10">
+                                <i class="fas fa-volume-up text-sm"></i>
+                            </button>
+                            <span class="text-4xl block mb-2">👥</span>
+                            <h3 class="font-black text-2xl text-slate-800 mb-2">You/We/They <span class="text-emerald-500">are</span></h3>
+                            <p class="text-slate-600 font-medium text-sm md:text-base">We <span class="text-emerald-500 font-bold">are</span> nervous today. 😬</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-xl mb-8 flex gap-3 md:gap-4 items-start shadow-sm">
+                        <div class="bg-amber-100 p-2 rounded-full shrink-0"><i class="fas fa-lightbulb text-amber-500 text-xl"></i></div>
+                        <div>
+                            <h4 class="font-black text-amber-800 text-sm md:text-base">Pro Tip: ¡El sujeto es obligatorio!</h4>
+                            <p class="text-amber-700 font-medium mt-1 text-xs md:text-sm leading-relaxed">En español decimos "Soy feliz", pero en inglés <strong>SIEMPRE</strong> debes escribir la persona: <strong class="bg-amber-200 px-1.5 py-0.5 rounded text-amber-900 border border-amber-300">I am happy</strong>. <br class="hidden sm:block"> Tampoco <em>"tenemos"</em> edad, <em>"somos"</em> la edad: <strong class="bg-amber-200 px-1.5 py-0.5 rounded text-amber-900 border border-amber-300">I am 20 years old</strong>.</p>
+                        </div>
+                    </div>
+
+                    <h3 class="font-black text-slate-700 mb-4 border-b border-slate-200 pb-2 flex items-center flex-wrap gap-2"><span class="bg-slate-100 px-2 py-1 rounded text-slate-500 text-sm">Práctica</span> <span class="text-base md:text-lg">Selecciona el verbo correcto:</span></h3>
+                    <div class="space-y-4 text-base md:text-xl font-medium text-slate-700">
+                        <p class="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm leading-loose">
+                            1. My brother and I 
+                            <select id="l1-q1" class="custom-select inline-block mx-1 md:mx-2 bg-white border-2 border-slate-300 text-blue-700 font-bold rounded-lg px-2 md:px-3 py-1 focus:outline-none focus:border-blue-500 w-auto min-w-[80px] text-center cursor-pointer shadow-sm text-base">
+                                <option value="">---</option><option value="am">am</option><option value="is">is</option><option value="are">are</option>
+                            </select> 
+                            very <strong>funny</strong>. 😂
+                        </p>
+                        <p class="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm leading-loose">
+                            2. The cat 
+                            <select id="l1-q2" class="custom-select inline-block mx-1 md:mx-2 bg-white border-2 border-slate-300 text-blue-700 font-bold rounded-lg px-2 md:px-3 py-1 focus:outline-none focus:border-blue-500 w-auto min-w-[80px] text-center cursor-pointer shadow-sm text-base">
+                                <option value="">---</option><option value="am">am</option><option value="is">is</option><option value="are">are</option>
+                            </select> 
+                            extremely <strong>lazy</strong> today. 🦥
+                        </p>
+                        <p class="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm leading-loose">
+                            3. I 
+                            <select id="l1-q3" class="custom-select inline-block mx-1 md:mx-2 bg-white border-2 border-slate-300 text-blue-700 font-bold rounded-lg px-2 md:px-3 py-1 focus:outline-none focus:border-blue-500 w-auto min-w-[80px] text-center cursor-pointer shadow-sm text-base">
+                                <option value="">---</option><option value="am">am</option><option value="is">is</option><option value="are">are</option>
+                            </select> 
+                            <strong>nervous</strong> about the English test. 😬
+                        </p>
+                        <p class="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm leading-loose">
+                            4. Sofia 
+                            <select id="l1-q4" class="custom-select inline-block mx-1 md:mx-2 bg-white border-2 border-slate-300 text-blue-700 font-bold rounded-lg px-2 md:px-3 py-1 focus:outline-none focus:border-blue-500 w-auto min-w-[80px] text-center cursor-pointer shadow-sm text-base">
+                                <option value="">---</option><option value="am">am</option><option value="is">is</option><option value="are">are</option>
+                            </select> 
+                            a very <strong>smart</strong> doctor. 🧠
+                        </p>
+                    </div>
+                    <button onclick="checkLesson1()" class="w-full mt-6 py-3.5 md:py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-base md:text-lg transition shadow-md hover:-translate-y-0.5">Verificar Respuestas</button>
+                    <div id="l1-feedback" class="mt-4 text-center font-bold text-base md:text-lg hidden p-4 rounded-xl"></div>
+                </div>
+            </div>
+
+            <div class="slide hidden slide-enter">
+                <div class="mb-6 md:mb-8 text-center">
+                    <span class="bg-rose-100 text-rose-700 text-xs md:text-sm font-black px-4 py-1.5 rounded-full uppercase tracking-wider">Lesson 2</span>
+                    <h2 class="text-3xl md:text-5xl font-black text-slate-800 mt-4 leading-tight">Negaciones</h2>
+                    <p class="text-slate-600 text-base md:text-lg mt-3 md:mt-4 max-w-2xl mx-auto">Para negar, simplemente agrega la palabra <strong class="bg-rose-100 text-rose-700 px-2 rounded">NOT</strong> inmediatamente después del verbo To Be.</p>
+                </div>
+                
+                <div class="bg-white p-5 md:p-8 rounded-2xl md:rounded-3xl border border-slate-200 shadow-xl mb-8">
+                    
+                    <h3 class="font-black text-slate-700 mb-4 text-center text-sm md:text-base">Formas Cortas (Contracciones):</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6">
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col items-center justify-center relative group hover:border-rose-200 transition">
+                            <button onclick="playAudio(event, 'I am not ready. I\\'m not ready.')" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center hover:bg-slate-300 transition opacity-100 sm:opacity-0 group-hover:opacity-100 cursor-pointer"><i class="fas fa-volume-up text-xs"></i></button>
+                            <span class="text-slate-500 font-bold mb-1 text-sm md:text-base">am not</span>
+                            <i class="fas fa-arrow-down text-slate-300 my-1"></i>
+                            <span class="text-lg md:text-xl font-black text-rose-600">'m not</span>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col items-center justify-center relative group hover:border-rose-200 transition">
+                            <button onclick="playAudio(event, 'He is not lazy. He isn\\'t lazy.')" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center hover:bg-slate-300 transition opacity-100 sm:opacity-0 group-hover:opacity-100 cursor-pointer"><i class="fas fa-volume-up text-xs"></i></button>
+                            <span class="text-slate-500 font-bold mb-1 text-sm md:text-base">is not</span>
+                            <i class="fas fa-arrow-down text-slate-300 my-1"></i>
+                            <span class="text-lg md:text-xl font-black text-rose-600">isn't</span>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col items-center justify-center relative group hover:border-rose-200 transition">
+                            <button onclick="playAudio(event, 'They are not friendly. They aren\\'t friendly.')" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center hover:bg-slate-300 transition opacity-100 sm:opacity-0 group-hover:opacity-100 cursor-pointer"><i class="fas fa-volume-up text-xs"></i></button>
+                            <span class="text-slate-500 font-bold mb-1 text-sm md:text-base">are not</span>
+                            <i class="fas fa-arrow-down text-slate-300 my-1"></i>
+                            <span class="text-lg md:text-xl font-black text-rose-600">aren't</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-sky-50 border-l-4 border-sky-400 p-4 rounded-r-xl mb-8 flex gap-3 md:gap-4 items-start shadow-sm">
+                        <div class="bg-sky-100 p-2 rounded-full shrink-0"><i class="fas fa-comment text-sky-500 text-xl"></i></div>
+                        <div>
+                            <h4 class="font-black text-sky-800 text-sm md:text-base">¿Cuándo usar contracciones?</h4>
+                            <p class="text-sky-700 font-medium mt-1 text-xs md:text-sm leading-relaxed">En el inglés hablado y en textos informales, las contracciones (isn't, aren't) son <strong>súper comunes</strong>. Suenan mucho más naturales que decir la forma completa.</p>
+                        </div>
+                    </div>
+
+                    <h3 class="font-black text-slate-700 mb-4 border-b border-slate-200 pb-2 flex items-center flex-wrap gap-2"><span class="bg-slate-100 px-2 py-1 rounded text-slate-500 text-sm">Práctica</span> <span class="text-base md:text-lg">Reescribe la oración en negativo:</span></h3>
+                    <div class="space-y-4">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm relative">
+                            <p class="text-slate-600 font-medium mb-2 flex items-center gap-2 text-sm md:text-base">1. He is <strong>lazy</strong>. <button onclick="playAudio(event, 'He is lazy.')" class="text-slate-400 hover:text-blue-500 cursor-pointer"><i class="fas fa-volume-up"></i></button></p>
+                            <!-- text-base prevents iOS zoom -->
+                            <input type="text" id="l2-q1" data-ans1="he is not lazy" data-ans2="he isn't lazy" class="w-full bg-white border-2 border-slate-200 p-3 rounded-lg font-bold text-slate-700 focus:border-rose-500 focus:outline-none shadow-sm text-base placeholder:text-sm" placeholder="Escribe en negativo...">
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm relative">
+                            <p class="text-slate-600 font-medium mb-2 flex items-center gap-2 text-sm md:text-base">2. They are <strong>scared</strong>. <button onclick="playAudio(event, 'They are scared.')" class="text-slate-400 hover:text-blue-500 cursor-pointer"><i class="fas fa-volume-up"></i></button></p>
+                            <input type="text" id="l2-q2" data-ans1="they are not scared" data-ans2="they aren't scared" class="w-full bg-white border-2 border-slate-200 p-3 rounded-lg font-bold text-slate-700 focus:border-rose-500 focus:outline-none shadow-sm text-base placeholder:text-sm" placeholder="Escribe en negativo...">
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm relative">
+                            <p class="text-slate-600 font-medium mb-2 flex items-center gap-2 text-sm md:text-base">3. I am <strong>surprised</strong>. <button onclick="playAudio(event, 'I am surprised.')" class="text-slate-400 hover:text-blue-500 cursor-pointer"><i class="fas fa-volume-up"></i></button></p>
+                            <input type="text" id="l2-q3" data-ans1="i am not surprised" data-ans2="i'm not surprised" class="w-full bg-white border-2 border-slate-200 p-3 rounded-lg font-bold text-slate-700 focus:border-rose-500 focus:outline-none shadow-sm text-base placeholder:text-sm" placeholder="Escribe en negativo...">
+                        </div>
+                    </div>
+                    <button onclick="checkLesson2()" class="w-full mt-6 py-3.5 md:py-4 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-black text-base md:text-lg transition shadow-md hover:-translate-y-0.5">Verificar Respuestas</button>
+                    <div id="l2-feedback" class="mt-4 text-center font-bold text-base md:text-lg hidden p-4 rounded-xl"></div>
+                </div>
+            </div>
+
+            <div class="slide hidden slide-enter">
+                <div class="mb-6 md:mb-8 text-center">
+                    <span class="bg-amber-100 text-amber-700 text-xs md:text-sm font-black px-4 py-1.5 rounded-full uppercase tracking-wider">Lesson 3</span>
+                    <h2 class="text-3xl md:text-5xl font-black text-slate-800 mt-4 leading-tight">Preguntas Yes/No</h2>
+                    <p class="text-slate-600 text-base md:text-lg mt-3 md:mt-4 max-w-2xl mx-auto">El verbo To Be es tan fuerte que para preguntar, no necesita ayuda, solo <strong>salta al principio</strong> de la oración.</p>
+                </div>
+                
+                <div class="bg-white p-5 md:p-8 rounded-2xl md:rounded-3xl border border-slate-200 shadow-xl mb-8">
+                    
+                    <div class="bg-slate-800 p-5 md:p-6 rounded-2xl mb-8 shadow-inner overflow-hidden relative">
+                        <!-- Added flex-wrap and responsive gaps to ensure it fits on small mobile -->
+                        <div class="flex items-center justify-center gap-2 sm:gap-3 md:gap-4 text-sm sm:text-base md:text-xl font-black relative z-10 flex-wrap leading-loose">
+                            <div class="bg-gradient-to-br from-amber-400 to-orange-500 text-white p-2.5 sm:p-3 md:p-4 rounded-xl shadow-lg transform -rotate-2">Am / Is / Are</div>
+                            <i class="fas fa-plus text-slate-500 text-xs sm:text-sm md:text-base"></i>
+                            <div class="bg-white text-slate-800 p-2.5 sm:p-3 md:p-4 rounded-xl shadow-sm border-2 border-slate-600">Sujeto</div>
+                            <i class="fas fa-plus text-slate-500 text-xs sm:text-sm md:text-base"></i>
+                            <div class="bg-slate-700 text-slate-300 p-2.5 sm:p-3 md:p-4 rounded-xl border border-slate-600 flex items-center">Compl. <span class="text-amber-400 text-xl md:text-2xl ml-1">?</span></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                        <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 text-center shadow-sm">
+                            <h4 class="font-black text-emerald-700 mb-2 text-sm md:text-base">Respuestas Cortas (Sí)</h4>
+                            <p class="text-emerald-800 font-medium bg-white p-2 rounded shadow-sm text-sm md:text-base">Yes, I am.</p>
+                            <p class="text-emerald-800 font-medium bg-white p-2 rounded shadow-sm mt-2 text-sm md:text-base">Yes, she is.</p>
+                            <p class="text-xs text-emerald-600 mt-2 font-bold"><i class="fas fa-ban mr-1"></i> ¡No uses contracciones aquí!</p>
+                        </div>
+                        <div class="bg-rose-50 p-4 rounded-2xl border border-rose-200 text-center shadow-sm">
+                            <h4 class="font-black text-rose-700 mb-2 text-sm md:text-base">Respuestas Cortas (No)</h4>
+                            <p class="text-rose-800 font-medium bg-white p-2 rounded shadow-sm text-sm md:text-base">No, I'm not.</p>
+                            <p class="text-rose-800 font-medium bg-white p-2 rounded shadow-sm mt-2 text-sm md:text-base">No, she isn't.</p>
+                            <p class="text-xs text-rose-600 mt-2 font-bold"><i class="fas fa-check mr-1"></i> Aquí SÍ usamos contracciones.</p>
+                        </div>
+                    </div>
+
+                    <h3 class="font-black text-slate-700 mb-4 border-b border-slate-200 pb-2 flex items-center flex-wrap gap-2"><span class="bg-slate-100 px-2 py-1 rounded text-slate-500 text-sm">Quiz</span> <span class="text-base md:text-lg">Selecciona la estructura correcta:</span></h3>
+                    <div class="space-y-4 text-base md:text-lg font-medium text-slate-700" id="l3-quiz">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide hidden slide-enter">
+                <div class="mb-6 md:mb-8 text-center">
+                    <span class="bg-purple-100 text-purple-700 text-xs md:text-sm font-black px-4 py-1.5 rounded-full uppercase tracking-wider">Lesson 4</span>
+                    <h2 class="text-3xl md:text-5xl font-black text-slate-800 mt-4 leading-tight">Preguntas WH-</h2>
+                    <p class="text-slate-600 text-base md:text-lg mt-3 md:mt-4 max-w-2xl mx-auto">Para pedir información específica, ponemos las palabras <strong>WH-</strong> justo al inicio, <strong class="bg-purple-100 text-purple-700 px-1 rounded">antes</strong> del verbo To Be.</p>
+                </div>
+                
+                <div class="bg-white p-5 md:p-8 rounded-2xl md:rounded-3xl border border-slate-200 shadow-xl mb-8">
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
+                        <div class="bg-purple-50 text-purple-800 text-center p-3 rounded-xl font-bold shadow-sm border border-purple-100 hover:bg-purple-100 transition relative group">
+                            <button onclick="playAudio(event, 'What is your name?')" class="absolute top-1 right-1 opacity-100 md:opacity-0 group-hover:opacity-100 text-purple-400 hover:text-purple-600 cursor-pointer p-1"><i class="fas fa-volume-up text-xs"></i></button>
+                            <span class="block text-2xl md:text-3xl mb-1">🤷‍♂️</span>What<br><span class="text-xs font-medium text-purple-600">Qué/Cuál</span>
+                        </div>
+                        <div class="bg-purple-50 text-purple-800 text-center p-3 rounded-xl font-bold shadow-sm border border-purple-100 hover:bg-purple-100 transition relative group">
+                            <button onclick="playAudio(event, 'Where are you from?')" class="absolute top-1 right-1 opacity-100 md:opacity-0 group-hover:opacity-100 text-purple-400 hover:text-purple-600 cursor-pointer p-1"><i class="fas fa-volume-up text-xs"></i></button>
+                            <span class="block text-2xl md:text-3xl mb-1">📍</span>Where<br><span class="text-xs font-medium text-purple-600">Dónde</span>
+                        </div>
+                        <div class="bg-purple-50 text-purple-800 text-center p-3 rounded-xl font-bold shadow-sm border border-purple-100 hover:bg-purple-100 transition relative group">
+                            <button onclick="playAudio(event, 'Who is that man?')" class="absolute top-1 right-1 opacity-100 md:opacity-0 group-hover:opacity-100 text-purple-400 hover:text-purple-600 cursor-pointer p-1"><i class="fas fa-volume-up text-xs"></i></button>
+                            <span class="block text-2xl md:text-3xl mb-1">👤</span>Who<br><span class="text-xs font-medium text-purple-600">Quién</span>
+                        </div>
+                        <div class="bg-purple-50 text-purple-800 text-center p-3 rounded-xl font-bold shadow-sm border border-purple-100 hover:bg-purple-100 transition relative group">
+                            <button onclick="playAudio(event, 'Why are you angry?')" class="absolute top-1 right-1 opacity-100 md:opacity-0 group-hover:opacity-100 text-purple-400 hover:text-purple-600 cursor-pointer p-1"><i class="fas fa-volume-up text-xs"></i></button>
+                            <span class="block text-2xl md:text-3xl mb-1">🤔</span>Why<br><span class="text-xs font-medium text-purple-600">Por qué</span>
+                        </div>
+                        <div class="bg-purple-50 text-purple-800 text-center p-3 rounded-xl font-bold shadow-sm border border-purple-100 hover:bg-purple-100 transition relative group col-span-2 sm:col-span-1 md:col-span-1">
+                            <button onclick="playAudio(event, 'How old are you?')" class="absolute top-1 right-1 opacity-100 md:opacity-0 group-hover:opacity-100 text-purple-400 hover:text-purple-600 cursor-pointer p-1"><i class="fas fa-volume-up text-xs"></i></button>
+                            <span class="block text-2xl md:text-3xl mb-1">🎂</span>How old<br><span class="text-xs font-medium text-purple-600">Qué edad</span>
+                        </div>
+                    </div>
+
+                    <h3 class="font-black text-slate-700 mb-4 border-b border-slate-200 pb-2 flex items-center flex-wrap gap-2"><span class="bg-slate-100 px-2 py-1 rounded text-slate-500 text-sm">Práctica</span> <span class="text-base md:text-lg">Elige la palabra basándote en la respuesta:</span></h3>
+                    <div class="space-y-4 text-base md:text-lg font-medium text-slate-700">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
+                            <div class="leading-loose text-sm sm:text-base md:text-lg">
+                                <select id="l4-q1" class="custom-select bg-white border-2 border-slate-300 text-purple-700 font-bold rounded-lg px-2 md:px-3 py-1 focus:outline-none focus:border-purple-500 cursor-pointer shadow-sm text-base min-w-[90px]">
+                                    <option value="">---</option><option value="What">What</option><option value="Where">Where</option><option value="Who">Who</option>
+                                </select> 
+                                are you from?
+                            </div>
+                            <span class="bg-white px-3 md:px-4 py-2 rounded-lg text-xs sm:text-sm text-slate-600 font-bold shadow-sm border border-slate-200 flex items-center gap-2 self-start md:self-auto"><i class="fas fa-comment-dots text-slate-400 shrink-0"></i> I am from Canada. 🍁</span>
+                        </div>
+
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
+                            <div class="leading-loose text-sm sm:text-base md:text-lg">
+                                <select id="l4-q2" class="custom-select bg-white border-2 border-slate-300 text-purple-700 font-bold rounded-lg px-2 md:px-3 py-1 focus:outline-none focus:border-purple-500 cursor-pointer shadow-sm text-base min-w-[90px]">
+                                    <option value="">---</option><option value="Why">Why</option><option value="How old">How old</option><option value="What">What</option>
+                                </select> 
+                                is he <strong>angry</strong>? 😠
+                            </div>
+                            <span class="bg-white px-3 md:px-4 py-2 rounded-lg text-xs sm:text-sm text-slate-600 font-bold shadow-sm border border-slate-200 flex items-center gap-2 self-start md:self-auto"><i class="fas fa-comment-dots text-slate-400 shrink-0"></i> Because he is tired.</span>
+                        </div>
+
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
+                            <div class="leading-loose text-sm sm:text-base md:text-lg">
+                                <select id="l4-q3" class="custom-select bg-white border-2 border-slate-300 text-purple-700 font-bold rounded-lg px-2 md:px-3 py-1 focus:outline-none focus:border-purple-500 cursor-pointer shadow-sm text-base min-w-[90px]">
+                                    <option value="">---</option><option value="Who">Who</option><option value="Where">Where</option><option value="How old">How old</option>
+                                </select> 
+                                is that <strong>Mexican</strong> girl?
+                            </div>
+                            <span class="bg-white px-3 md:px-4 py-2 rounded-lg text-xs sm:text-sm text-slate-600 font-bold shadow-sm border border-slate-200 flex items-center gap-2 self-start md:self-auto"><i class="fas fa-comment-dots text-slate-400 shrink-0"></i> She is my sister. 👩‍🦰</span>
+                        </div>
+                    </div>
+                    <button onclick="checkLesson4()" class="w-full mt-6 py-3.5 md:py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-black text-base md:text-lg transition shadow-md hover:-translate-y-0.5">Verificar Respuestas</button>
+                    <div id="l4-feedback" class="mt-4 text-center font-bold text-base md:text-lg hidden p-4 rounded-xl"></div>
+                </div>
+            </div>
+
+            <div class="slide hidden slide-enter">
+                <div class="mb-6 md:mb-8 text-center">
+                    <span class="bg-sky-100 text-sky-700 text-xs md:text-sm font-black px-4 py-1.5 rounded-full uppercase tracking-wider">Listening & Reading</span>
+                    <h2 class="text-3xl md:text-5xl font-black text-slate-800 mt-4 leading-tight">At the Airport ✈️</h2>
+                    <p class="text-slate-600 text-base md:text-lg mt-3 md:mt-4 max-w-2xl mx-auto px-2">Lee y escucha esta conversación. Presta atención, <strong>toda la charla usa únicamente el verbo To Be</strong>.</p>
+                </div>
+                
+                <div class="bg-white p-5 md:p-8 rounded-2xl md:rounded-3xl border border-slate-200 shadow-xl max-w-4xl mx-auto relative overflow-hidden">
+                    <div class="absolute top-3 right-3 md:top-4 md:right-4 z-10">
+                        <button id="btn-play-convo" onclick="playConversation()" class="w-10 h-10 md:w-12 md:h-12 bg-sky-500 hover:bg-sky-600 text-white rounded-full flex items-center justify-center shadow-lg transition hover:scale-105 cursor-pointer">
+                            <i class="fas fa-play text-lg md:text-xl" id="icon-play-convo"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-5 md:space-y-6 mt-10 md:mt-8" id="conversation-script">
+                        <div class="flex gap-3 md:gap-4 items-start">
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-100 rounded-full flex items-center justify-center text-xl md:text-2xl shrink-0 border border-indigo-200 shadow-sm">👨</div>
+                            <div class="bg-indigo-50 p-3 md:p-4 rounded-2xl rounded-tl-none border border-indigo-100 shadow-sm max-w-[85%]">
+                                <p class="text-[10px] md:text-xs font-bold text-indigo-400 mb-0.5 md:mb-1">LEO</p>
+                                <p class="text-slate-700 font-medium text-sm md:text-lg break-words">Hello! <strong class="text-indigo-700">Are</strong> you the new exchange student?</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 md:gap-4 items-start flex-row-reverse">
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-rose-100 rounded-full flex items-center justify-center text-xl md:text-2xl shrink-0 border border-rose-200 shadow-sm">👩</div>
+                            <div class="bg-rose-50 p-3 md:p-4 rounded-2xl rounded-tr-none border border-rose-100 text-right shadow-sm max-w-[85%]">
+                                <p class="text-[10px] md:text-xs font-bold text-rose-400 mb-0.5 md:mb-1">SOFIA</p>
+                                <p class="text-slate-700 font-medium text-sm md:text-lg break-words">Yes, I <strong class="text-rose-700">am</strong>. My name <strong class="text-rose-700">is</strong> Sofia.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 md:gap-4 items-start">
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-100 rounded-full flex items-center justify-center text-xl md:text-2xl shrink-0 border border-indigo-200 shadow-sm">👨</div>
+                            <div class="bg-indigo-50 p-3 md:p-4 rounded-2xl rounded-tl-none border border-indigo-100 shadow-sm max-w-[85%]">
+                                <p class="text-[10px] md:text-xs font-bold text-indigo-400 mb-0.5 md:mb-1">LEO</p>
+                                <p class="text-slate-700 font-medium text-sm md:text-lg break-words">Nice to meet you, Sofia. I <strong class="text-indigo-700">am</strong> Leo. Where <strong class="text-indigo-700">are</strong> you from?</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 md:gap-4 items-start flex-row-reverse">
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-rose-100 rounded-full flex items-center justify-center text-xl md:text-2xl shrink-0 border border-rose-200 shadow-sm">👩</div>
+                            <div class="bg-rose-50 p-3 md:p-4 rounded-2xl rounded-tr-none border border-rose-100 text-right shadow-sm max-w-[85%]">
+                                <p class="text-[10px] md:text-xs font-bold text-rose-400 mb-0.5 md:mb-1">SOFIA</p>
+                                <p class="text-slate-700 font-medium text-sm md:text-lg break-words">I <strong class="text-rose-700">am</strong> from <strong>Colombia</strong>. And you?</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 md:gap-4 items-start">
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-100 rounded-full flex items-center justify-center text-xl md:text-2xl shrink-0 border border-indigo-200 shadow-sm">👨</div>
+                            <div class="bg-indigo-50 p-3 md:p-4 rounded-2xl rounded-tl-none border border-indigo-100 shadow-sm max-w-[85%]">
+                                <p class="text-[10px] md:text-xs font-bold text-indigo-400 mb-0.5 md:mb-1">LEO</p>
+                                <p class="text-slate-700 font-medium text-sm md:text-lg break-words">I <strong class="text-indigo-700">am</strong> from <strong>Canada</strong>. How old <strong class="text-indigo-700">are</strong> you?</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 md:gap-4 items-start flex-row-reverse">
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-rose-100 rounded-full flex items-center justify-center text-xl md:text-2xl shrink-0 border border-rose-200 shadow-sm">👩</div>
+                            <div class="bg-rose-50 p-3 md:p-4 rounded-2xl rounded-tr-none border border-rose-100 text-right shadow-sm max-w-[85%]">
+                                <p class="text-[10px] md:text-xs font-bold text-rose-400 mb-0.5 md:mb-1">SOFIA</p>
+                                <p class="text-slate-700 font-medium text-sm md:text-lg break-words">I <strong class="text-rose-700">am</strong> 22 years old. <strong class="text-rose-700">Is</strong> it cold in Canada?</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 md:gap-4 items-start">
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-100 rounded-full flex items-center justify-center text-xl md:text-2xl shrink-0 border border-indigo-200 shadow-sm">👨</div>
+                            <div class="bg-indigo-50 p-3 md:p-4 rounded-2xl rounded-tl-none border border-indigo-100 shadow-sm max-w-[85%]">
+                                <p class="text-[10px] md:text-xs font-bold text-indigo-400 mb-0.5 md:mb-1">LEO</p>
+                                <p class="text-slate-700 font-medium text-sm md:text-lg break-words">Yes, it <strong class="text-indigo-700">is</strong> very cold! Why <strong class="text-indigo-700">are</strong> you here in London?</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 md:gap-4 items-start flex-row-reverse">
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-rose-100 rounded-full flex items-center justify-center text-xl md:text-2xl shrink-0 border border-rose-200 shadow-sm">👩</div>
+                            <div class="bg-rose-50 p-3 md:p-4 rounded-2xl rounded-tr-none border border-rose-100 text-right shadow-sm max-w-[85%]">
+                                <p class="text-[10px] md:text-xs font-bold text-rose-400 mb-0.5 md:mb-1">SOFIA</p>
+                                <p class="text-slate-700 font-medium text-sm md:text-lg break-words">Because I <strong class="text-rose-700">am</strong> on vacation and I love big cities. <strong class="text-rose-700">Are</strong> you <strong>hungry</strong>?</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 md:gap-4 items-start">
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-indigo-100 rounded-full flex items-center justify-center text-xl md:text-2xl shrink-0 border border-indigo-200 shadow-sm">👨</div>
+                            <div class="bg-indigo-50 p-3 md:p-4 rounded-2xl rounded-tl-none border border-indigo-100 shadow-sm max-w-[85%]">
+                                <p class="text-[10px] md:text-xs font-bold text-indigo-400 mb-0.5 md:mb-1">LEO</p>
+                                <p class="text-slate-700 font-medium text-sm md:text-lg break-words">Yes, I <strong class="text-indigo-700">am</strong>. Let's get some food!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide hidden slide-enter">
+                <div class="mb-6 md:mb-8 text-center">
+                    <span class="bg-emerald-100 text-emerald-700 text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-wider">Comprehension</span>
+                    <h2 class="text-3xl md:text-5xl font-black mt-3 text-slate-800">Reading Quiz 🎯</h2>
+                    <p class="text-slate-500 mt-2 font-medium text-sm md:text-base px-2">Responde basado en la conversación del aeropuerto.</p>
+                </div>
+                <div class="bg-white p-5 md:p-10 rounded-2xl md:rounded-3xl border border-slate-200 max-w-3xl mx-auto shadow-xl" id="quiz-conversation">
+                    <!-- Dynamic JS content -->
+                </div>
+            </div>
+
+            <div class="slide hidden slide-enter text-center mt-8 md:mt-20">
+                <div class="inline-block p-5 md:p-6 rounded-full bg-slate-800 mb-4 md:mb-6 border-4 border-slate-700 shadow-2xl pulse-soft text-white">
+                    <span class="text-6xl md:text-8xl"><i class="fas fa-trophy text-yellow-400"></i></span>
+                </div>
+                <h2 class="text-3xl sm:text-4xl md:text-7xl font-black mb-4 md:mb-6 tracking-tight text-slate-800 leading-tight">
+                    Práctica <br class="md:hidden" />
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-500">General Final</span>
+                </h2>
+                <p class="text-base sm:text-lg md:text-2xl text-slate-600 mb-8 md:mb-10 max-w-3xl mx-auto font-medium px-4 leading-relaxed">
+                    10 preguntas combinando todo el <strong>Verbo To Be</strong>. Usaremos muchas palabras del diccionario (Smart, Lazy, Scared, etc.).
+                </p>
+                <button onclick="startMegaQuiz()" class="w-full sm:w-auto px-8 md:px-12 py-4 md:py-5 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white rounded-xl md:rounded-2xl font-black text-lg md:text-xl transition-all shadow-xl hover:-translate-y-1">
+                    Comenzar Quiz <i class="fas fa-check-double ml-2"></i>
+                </button>
+            </div>
+
+            <div class="slide hidden slide-enter">
+                <div class="mb-6 md:mb-8 text-center">
+                    <span class="bg-slate-800 text-white text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-wider" id="mega-quiz-counter">Pregunta 1 de 10</span>
+                    <h2 class="text-3xl md:text-5xl font-black mt-3 md:mt-4 text-slate-800">To Be: Mega Quiz</h2>
+                </div>
+                <div class="bg-white p-5 md:p-10 rounded-2xl md:rounded-3xl border border-slate-200 max-w-3xl mx-auto shadow-2xl relative overflow-hidden" id="mega-quiz-container">
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-slate-100">
+                        <div id="mega-quiz-progress" class="h-full bg-yellow-400 transition-all duration-300 w-0"></div>
+                    </div>
+                    <div id="mega-quiz-content" class="mt-4"></div>
+                </div>
+            </div>
+
+            <div class="slide hidden slide-enter text-center mt-8 md:mt-20">
+                <div class="relative w-32 h-32 sm:w-40 sm:h-40 md:w-56 md:h-56 mx-auto mb-8 md:mb-10">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-sky-400 to-blue-600 rounded-full blur-2xl opacity-40 pulse-soft"></div>
+                    <div class="relative w-full h-full bg-white rounded-full flex items-center justify-center shadow-2xl border-8 border-slate-50 text-6xl md:text-8xl">
+                        👑
+                    </div>
+                </div>
+                <h2 class="text-3xl sm:text-4xl md:text-6xl font-black mb-4 md:mb-6 text-slate-800 tracking-tight">
+                    ¡Tarea Completada!
+                </h2>
+                <p class="text-base sm:text-xl md:text-2xl text-slate-600 mb-8 md:mb-12 max-w-2xl mx-auto font-medium leading-relaxed px-4">
+                    Has demostrado un dominio total de los aspectos del <strong>Verbo To Be</strong>. Tu profesor/a estará muy orgulloso/a de ti.
+                </p>
+                <button onclick="location.reload()" class="w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl md:rounded-2xl font-black text-lg md:text-xl transition-all shadow-xl hover:-translate-y-1">
+                    <i class="fas fa-redo mr-2"></i> Repasar Todo
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="h-16 md:h-24 bg-white border-t border-slate-200 flex items-center justify-between px-3 md:px-10 shrink-0 z-20 shadow-[0_-4px_20px_rgba(0,0,0,0.02)] relative">
+        <button id="btn-prev" onclick="prevSlide()" class="px-4 py-2.5 md:px-6 md:py-4 rounded-xl md:rounded-2xl font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 transition opacity-50 cursor-not-allowed disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 md:gap-2 text-sm md:text-lg border border-slate-200 shadow-sm">
+            <i class="fas fa-chevron-left"></i> Atrás
+        </button>
+        <button id="btn-next" onclick="nextSlide()" class="px-4 py-2.5 md:px-10 md:py-4 rounded-xl md:rounded-2xl font-black bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-600 text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-1 flex items-center gap-1 md:gap-2 text-sm md:text-lg">
+            Continuar <i class="fas fa-chevron-right"></i>
+        </button>
+    </footer>
+
+    <div id="dictionary-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-center items-center opacity-0 transition-opacity duration-300 p-2 sm:p-4">
+        <div class="bg-white w-full max-w-5xl h-[95dvh] md:h-[90dvh] rounded-2xl md:rounded-3xl shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300 border border-slate-200" id="dictionary-box">
+            
+            <div class="bg-slate-50 p-4 md:p-6 border-b border-slate-200 flex justify-between items-center shrink-0">
+                <div>
+                    <h2 class="text-lg sm:text-xl md:text-3xl font-black text-slate-800 flex items-center gap-2 md:gap-3"><i class="fas fa-book-open text-sky-600"></i> Dictionary: To Be</h2>
+                    <p class="text-slate-500 text-[10px] sm:text-xs md:text-sm font-bold mt-1">Toca el icono de la bocina <i class="fas fa-volume-up mx-1 text-slate-400"></i> para escuchar.</p>
+                </div>
+                <button onclick="toggleDictionary()" class="w-8 h-8 md:w-12 md:h-12 rounded-full bg-slate-200 text-slate-600 hover:bg-rose-100 hover:text-rose-600 flex items-center justify-center transition-colors shadow-inner shrink-0 cursor-pointer">
+                    <i class="fas fa-times text-base md:text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Tabs with smooth scrolling for mobile overflow -->
+            <div class="flex border-b border-slate-200 shrink-0 overflow-x-auto no-scrollbar scroll-smooth px-2">
+                <button onclick="switchTab('dict-feelings')" class="dict-tab active px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-black text-sky-600 border-b-4 border-sky-600 whitespace-nowrap cursor-pointer">Emociones</button>
+                <button onclick="switchTab('dict-adjectives')" class="dict-tab px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-bold text-slate-500 hover:text-slate-700 border-b-4 border-transparent whitespace-nowrap cursor-pointer">Gente y Descripciones</button>
+                <button onclick="switchTab('dict-questions')" class="dict-tab px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-bold text-slate-500 hover:text-slate-700 border-b-4 border-transparent whitespace-nowrap cursor-pointer">Palabras WH-</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 bg-slate-50/50">
+                <div id="dict-feelings" class="dict-content grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"></div>
+                <div id="dict-adjectives" class="dict-content hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"></div>
+                <div id="dict-questions" class="dict-content hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dictData = {
+            feelings: [
+                { en: "Happy", es: "Feliz", emoji: "😊" },
+                { en: "Sad", es: "Triste", emoji: "😢" },
+                { en: "Tired", es: "Cansado/a", emoji: "🥱" },
+                { en: "Angry", es: "Enojado/a", emoji: "😠" },
+                { en: "Hungry", es: "Hambriento/a", emoji: "🍔" },
+                { en: "Thirsty", es: "Sediento/a", emoji: "💧" },
+                { en: "Bored", es: "Aburrido/a", emoji: "😑" },
+                { en: "Excited", es: "Emocionado/a", emoji: "🤩" },
+                { en: "Sick", es: "Enfermo/a", emoji: "🤒" },
+                { en: "Nervous", es: "Nervioso/a", emoji: "😬" },
+                { en: "Surprised", es: "Sorprendido/a", emoji: "😲" },
+                { en: "Scared", es: "Asustado/a", emoji: "😨" }
+            ],
+            adjectives: [
+                { en: "Smart", es: "Inteligente", emoji: "🧠" },
+                { en: "Funny", es: "Divertido/a", emoji: "😂" },
+                { en: "Lazy", es: "Perezoso/a, Flojo", emoji: "🦥" },
+                { en: "Friendly", es: "Amigable", emoji: "🤝" },
+                { en: "Ready", es: "Listo/a", emoji: "✅" },
+                { en: "Busy", es: "Ocupado/a", emoji: "🏃‍♂️" },
+                { en: "Married", es: "Casado/a", emoji: "💍" },
+                { en: "Single", es: "Soltero/a", emoji: "👤" },
+                { en: "At home", es: "En casa", emoji: "🏠" },
+                { en: "At work", es: "En el trabajo", emoji: "🏢" },
+                { en: "Mexican", es: "Mexicano/a", emoji: "🇲🇽" },
+                { en: "Canadian", es: "Canadiense", emoji: "🇨🇦" },
+                { en: "Colombian", es: "Colombiano/a", emoji: "🇨🇴" },
+                { en: "American", es: "Estadounidense", emoji: "🇺🇸" }
+            ],
+            questions: [
+                { en: "What", es: "Qué / Cuál", emoji: "🤷‍♂️" },
+                { en: "Where", es: "Dónde", emoji: "📍" },
+                { en: "When", es: "Cuándo", emoji: "⏰" },
+                { en: "Who", es: "Quién", emoji: "👤" },
+                { en: "Why", es: "Por qué", emoji: "🤔" },
+                { en: "How old", es: "Qué edad", emoji: "🎂" }
+            ]
+        };
+
+        const quizData = {
+            'quiz-l3': {
+                color: "amber", current: 0,
+                questions: [
+                    { q: "___ you <strong>surprised</strong>?", options: ["Are", "Is", "Am"], answer: 0 },
+                    { q: "___ she <strong>married</strong> or <strong>single</strong>?", options: ["Are", "Am", "Is"], answer: 2 },
+                    { q: "___ they from <strong>Mexico</strong>?", options: ["Is", "Are", "Am"], answer: 1 },
+                    { q: "___ I late for work?", options: ["Am", "Are", "Is"], answer: 0 },
+                    { q: "___ the dog <strong>hungry</strong>?", options: ["Are", "Am", "Is"], answer: 2 }
+                ]
+            },
+            'quiz-conversation': {
+                color: "emerald", current: 0,
+                questions: [
+                    { q: "Who is the exchange student?", options: ["Leo", "Sofia", "No one"], answer: 1 },
+                    { q: "Where is Leo from?", options: ["Colombia", "Canada", "London"], answer: 1 },
+                    { q: "How old is Sofia?", options: ["20 years old", "22 years old", "25 years old"], answer: 1 },
+                    { q: "Why is Sofia in London?", options: ["For work", "She is sick", "She is on vacation"], answer: 2 },
+                    { q: "Are they hungry at the end?", options: ["Yes, they are.", "No, they aren't.", "They are angry."], answer: 0 }
+                ]
+            }
+        };
+
+        const megaQuizData = [
+            { q: "I ___ a very <strong>friendly</strong> student.", options: ["am", "is"], answer: 0 },
+            { q: "They ___ not at home. They are at work.", options: ["is", "are"], answer: 1 },
+            { q: "___ you <strong>ready</strong> for the test?", options: ["Are", "Am"], answer: 0 },
+            { q: "He ___ 25 years old.", options: ["is", "has"], answer: 0 },
+            { q: "We ___ very <strong>tired</strong> today.", options: ["am", "are"], answer: 1 },
+            { q: "___ she a <strong>smart</strong> doctor?", options: ["Are", "Is"], answer: 1 },
+            { q: "Where ___ you from?", options: ["are", "is"], answer: 0 },
+            { q: "Why ___ he <strong>sad</strong>?", options: ["is", "are"], answer: 0 },
+            { q: "My cat ___ very <strong>lazy</strong>. 🦥", options: ["are", "is"], answer: 1 },
+            { q: "___ I your best friend?", options: ["Am", "Is"], answer: 0 }
+        ];
+
+        let megaQuizCurrent = 0;
+        let megaQuizScore = 0;
+        let currentSlide = 0;
+        let slides, progressBar, progressText, btnPrev, btnNext, mainContainer;
+
+        function updateUI() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('hidden', index !== currentSlide);
+            });
+
+            const progressPercentage = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            progressText.innerText = `Página ${currentSlide + 1} de ${slides.length}`;
+
+            mainContainer.scrollTop = 0;
+
+            if (currentSlide === 0) {
+                btnPrev.setAttribute('disabled', 'true');
+                btnPrev.classList.add('opacity-50', 'cursor-not-allowed', 'hover:bg-slate-50');
+                btnPrev.classList.remove('hover:bg-slate-100');
+            } else {
+                btnPrev.removeAttribute('disabled');
+                btnPrev.classList.remove('opacity-50', 'cursor-not-allowed', 'hover:bg-slate-50');
+                btnPrev.classList.add('hover:bg-slate-100');
+            }
+
+            if (currentSlide === slides.length - 1) {
+                btnNext.classList.add('hidden');
+            } else {
+                btnNext.classList.remove('hidden');
+            }
+        }
+
+        function nextSlide() { if (currentSlide < slides.length - 1) { currentSlide++; updateUI(); } }
+        function prevSlide() { if (currentSlide > 0) { currentSlide--; updateUI(); } }
+
+        function playAudio(event, text) {
+            if(event) event.stopPropagation();
+            if ('speechSynthesis' in window) {
+                try {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'en-US';
+                    utterance.rate = 0.85; 
+                    window.speechSynthesis.speak(utterance);
+                } catch(e) { console.log("Audio not supported"); }
+            }
+        }
+
+        let isPlayingConvo = false;
+        function playConversation() {
+            const icon = document.getElementById('icon-play-convo');
+            if ('speechSynthesis' in window) {
+                if(isPlayingConvo) {
+                    window.speechSynthesis.cancel();
+                    isPlayingConvo = false;
+                    icon.classList.replace('fa-stop', 'fa-play');
+                    return;
+                }
+                
+                const text = "Hello! Are you the new exchange student? Yes, I am. My name is Sofia. Nice to meet you, Sofia. I am Leo. Where are you from? I am from Colombia. And you? I am from Canada. How old are you? I am 22 years old. Is it cold in Canada? Yes, it is very cold! Why are you here in London? Because I am on vacation and I love big cities. Are you hungry? Yes, I am. Let's get some food!";
+                
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.85; 
+                
+                utterance.onend = () => {
+                    isPlayingConvo = false;
+                    icon.classList.replace('fa-stop', 'fa-play');
+                };
+
+                isPlayingConvo = true;
+                icon.classList.replace('fa-play', 'fa-stop');
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function checkLesson1() {
+            const answers = { 'l1-q1': "are", 'l1-q2': "is", 'l1-q3': "am", 'l1-q4': "is" };
+            let correctCount = 0;
+            
+            for(const [id, correctVal] of Object.entries(answers)) {
+                const select = document.getElementById(id);
+                select.classList.remove('border-slate-300', 'border-emerald-500', 'border-red-500', 'bg-emerald-50', 'bg-red-50', 'text-emerald-700', 'text-red-700', 'text-blue-700');
+                
+                if(select.value === correctVal) {
+                    correctCount++;
+                    select.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
+                } else {
+                    select.classList.add('border-red-500', 'bg-red-50', 'text-red-700');
+                }
+            }
+
+            const fb = document.getElementById('l1-feedback');
+            fb.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-700', 'bg-red-100', 'text-red-700');
+            if(correctCount === 4) {
+                fb.classList.add('bg-emerald-100', 'text-emerald-700', 'fade-in');
+                fb.innerHTML = `¡Excelente! 4/4 correctos. 🎉`;
+            } else {
+                fb.classList.add('bg-red-100', 'text-red-700', 'fade-in');
+                fb.innerHTML = `Tienes ${correctCount}/4 correctos. Recuerda checar los sujetos.`;
+            }
+        }
+
+        function checkLesson2() {
+            let correctCount = 0;
+            for(let i=1; i<=3; i++) {
+                const input = document.getElementById(`l2-q${i}`);
+                const userVal = input.value.trim().toLowerCase().replace(/[.?]/g, '').replace(/\s+/g, ' ');
+                const ans1 = input.dataset.ans1;
+                const ans2 = input.dataset.ans2;
+                
+                if(userVal === ans1 || userVal === ans2) {
+                    correctCount++;
+                    input.classList.replace('border-slate-200', 'border-emerald-400');
+                    input.classList.replace('focus:border-rose-500', 'focus:border-emerald-500');
+                    input.classList.add('bg-emerald-50', 'text-emerald-700');
+                    input.classList.remove('border-red-400', 'bg-red-50', 'text-red-700');
+                } else {
+                    input.classList.replace('border-slate-200', 'border-red-400');
+                    input.classList.replace('border-emerald-400', 'border-red-400');
+                    input.classList.add('bg-red-50', 'text-red-700');
+                    input.classList.remove('bg-emerald-50', 'text-emerald-700');
+                }
+            }
+
+            const fb = document.getElementById('l2-feedback');
+            fb.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-700', 'bg-red-100', 'text-red-700');
+            if(correctCount === 3) {
+                fb.classList.add('bg-emerald-100', 'text-emerald-700', 'fade-in');
+                fb.innerHTML = `¡Perfecto! Sabes negar muy bien. 🎉`;
+            } else {
+                fb.classList.add('bg-red-100', 'text-red-700', 'fade-in');
+                fb.innerHTML = `Vuelve a intentarlo. Tienes ${correctCount}/3. Usa 'not' después del To Be.`;
+            }
+        }
+
+        function checkLesson4() {
+            const answers = { 'l4-q1': "Where", 'l4-q2': "Why", 'l4-q3': "Who" };
+            let correctCount = 0;
+            
+            for(const [id, correctVal] of Object.entries(answers)) {
+                const select = document.getElementById(id);
+                select.classList.remove('border-slate-300', 'border-emerald-500', 'border-red-500', 'bg-emerald-50', 'bg-red-50', 'text-emerald-700', 'text-red-700', 'text-purple-700');
+                
+                if(select.value === correctVal) {
+                    correctCount++;
+                    select.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
+                } else {
+                    select.classList.add('border-red-500', 'bg-red-50', 'text-red-700');
+                }
+            }
+
+            const fb = document.getElementById('l4-feedback');
+            fb.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-700', 'bg-red-100', 'text-red-700');
+            if(correctCount === 3) {
+                fb.classList.add('bg-emerald-100', 'text-emerald-700', 'fade-in');
+                fb.innerHTML = `¡Gran trabajo entendiendo el contexto! 🎉`;
+            } else {
+                fb.classList.add('bg-red-100', 'text-red-700', 'fade-in');
+                fb.innerHTML = `Tienes ${correctCount}/3 correctos. Lee bien las respuestas.`;
+            }
+        }
+
+        function renderQuiz(exId, containerId) {
+            const ex = quizData[exId];
+            const container = document.getElementById(containerId);
+            if(!container) return;
+            
+            if (ex.current >= ex.questions.length) {
+                container.innerHTML = `
+                <div class="text-center p-6 md:p-8 bg-${ex.color}-50 rounded-2xl md:rounded-3xl border border-${ex.color}-200 fade-in">
+                    <div class="w-16 h-16 md:w-20 md:h-20 bg-${ex.color}-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-${ex.color}-500/30">
+                        <i class="fas fa-check text-3xl md:text-4xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl md:text-3xl font-black text-${ex.color}-700 mb-2">¡Completado!</h3>
+                    <p class="text-${ex.color}-600 font-bold text-sm md:text-lg">Excelente trabajo.</p>
+                </div>`;
+                return;
+            }
+
+            const q = ex.questions[ex.current];
+            const progressPercent = Math.round((ex.current / ex.questions.length) * 100);
+            
+            let qTextHtml = q.q.replace('___', `<span id="blank-${exId}" class="inline-block px-1 border-b-4 border-dashed border-slate-300 text-${ex.color}-600 font-bold mx-1 pb-1 min-w-[3rem] text-center transition-colors">___</span>`);
+
+            // Using CSS Grid for options creates a much better responsive layout than flex
+            const numOptions = q.options.length;
+            const gridClass = numOptions === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2";
+
+            let optionsHtml = q.options.map((opt, i) =>
+                `<button onclick="submitQuizAnswer('${exId}', '${containerId}', ${i})" class="w-full py-3.5 md:py-5 bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 hover:border-slate-300 rounded-xl md:rounded-2xl text-base md:text-xl font-bold text-slate-700 transition shadow-sm hover:-translate-y-0.5">${opt}</button>`
+            ).join('');
+
+            container.innerHTML = `
+                <div class="fade-in">
+                    <div class="mb-4 md:mb-6 flex justify-between items-center text-[10px] md:text-sm font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-3 md:pb-4">
+                        <span>Pregunta ${ex.current + 1} de ${ex.questions.length}</span>
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <div class="w-20 md:w-32 h-1.5 md:h-2 bg-slate-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-${ex.color}-500 transition-all duration-500" style="width: ${progressPercent}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl md:text-4xl font-medium text-slate-800 mb-6 md:mb-10 leading-relaxed text-center">${qTextHtml}</h3>
+                    <div class="grid grid-cols-1 ${gridClass} gap-3 md:gap-4" id="options-${exId}">
+                        ${optionsHtml}
+                    </div>
+                    <div id="feedback-${exId}" class="mt-5 md:mt-8 text-center text-base md:text-xl font-bold hidden p-3 md:p-5 rounded-xl md:rounded-2xl"></div>
+                    <button id="next-btn-${exId}" onclick="nextQuizQuestion('${exId}', '${containerId}')" class="mt-5 md:mt-8 w-full py-3.5 md:py-4 bg-${ex.color}-600 hover:bg-${ex.color}-700 text-white rounded-xl md:rounded-2xl font-black text-base md:text-xl hidden transition shadow-lg shadow-${ex.color}-600/30">
+                        Siguiente Pregunta <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function submitQuizAnswer(exId, containerId, selectedIndex) {
+            const ex = quizData[exId];
+            const q = ex.questions[ex.current];
+            const optionsContainer = document.getElementById(`options-${exId}`);
+            const buttons = optionsContainer.querySelectorAll('button');
+            const feedback = document.getElementById(`feedback-${exId}`);
+            const nextBtn = document.getElementById(`next-btn-${exId}`);
+            const blank = document.getElementById(`blank-${exId}`);
+
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-slate-100', 'hover:border-slate-300', 'hover:-translate-y-0.5');
+            });
+
+            feedback.classList.remove('hidden', 'bg-red-50', 'text-red-700', 'border-red-200', 'bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+
+            if (selectedIndex === q.answer) {
+                buttons[selectedIndex].classList.replace('bg-slate-50', 'bg-emerald-500');
+                buttons[selectedIndex].classList.replace('border-slate-200', 'border-emerald-600');
+                buttons[selectedIndex].classList.replace('text-slate-700', 'text-white');
+                buttons[selectedIndex].classList.add('shadow-md');
+                buttons.forEach((btn, i) => { if(i !== selectedIndex) btn.classList.add('opacity-40'); });
+
+                feedback.classList.add('bg-emerald-50', 'text-emerald-700', 'border', 'border-emerald-200');
+                feedback.innerHTML = '<i class="fas fa-check-circle mr-1 md:mr-2 text-xl md:text-2xl"></i> ¡Correcto!';
+                
+                if (blank) {
+                    blank.innerText = q.options[q.answer];
+                    blank.classList.remove(`text-${ex.color}-600`, 'border-slate-300');
+                    blank.classList.add('text-emerald-600', 'border-emerald-400');
+                }
+                
+                nextBtn.classList.remove('hidden');
+                nextBtn.classList.add('fade-in');
+            } else {
+                buttons[selectedIndex].classList.replace('bg-slate-50', 'bg-red-500');
+                buttons[selectedIndex].classList.replace('border-slate-200', 'border-red-600');
+                buttons[selectedIndex].classList.replace('text-slate-700', 'text-white');
+                buttons[selectedIndex].classList.add('shadow-md');
+
+                feedback.classList.add('bg-red-50', 'text-red-700', 'border', 'border-red-200', 'fade-in');
+                feedback.innerHTML = '<i class="fas fa-times-circle mr-1 md:mr-2 text-xl md:text-2xl"></i> Incorrecto.';
+                
+                setTimeout(() => {
+                    buttons.forEach((btn) => {
+                        btn.disabled = false;
+                        btn.className = "w-full py-3.5 md:py-5 bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 hover:border-slate-300 rounded-xl md:rounded-2xl text-base md:text-xl font-bold text-slate-700 transition shadow-sm hover:-translate-y-0.5";
+                    });
+                    feedback.classList.add('hidden');
+                }, 1500);
+            }
+        }
+
+        function nextQuizQuestion(exId, containerId) {
+            quizData[exId].current++;
+            renderQuiz(exId, containerId);
+        }
+
+        function startMegaQuiz() {
+            megaQuizCurrent = 0;
+            megaQuizScore = 0;
+            renderMegaQuizQuestion();
+            nextSlide();
+        }
+
+        function renderMegaQuizQuestion() {
+            const container = document.getElementById('mega-quiz-content');
+            const progress = document.getElementById('mega-quiz-progress');
+            const counter = document.getElementById('mega-quiz-counter');
+            
+            if(megaQuizCurrent >= megaQuizData.length) {
+                const scorePercent = Math.round((megaQuizScore / megaQuizData.length) * 100);
+                container.innerHTML = `
+                    <div class="text-center p-4 md:p-8 fade-in">
+                        <div class="text-5xl md:text-7xl mb-4">${scorePercent >= 80 ? '🎉' : '😅'}</div>
+                        <h3 class="text-2xl md:text-3xl font-black text-slate-800 mb-2">Tu Puntuación: ${scorePercent}%</h3>
+                        <p class="text-slate-600 text-base md:text-lg mb-6 md:mb-8">Has acertado ${megaQuizScore} de ${megaQuizData.length} preguntas.</p>
+                        ${scorePercent >= 80 ? 
+                            '<button onclick="nextSlide()" class="w-full sm:w-auto px-6 md:px-8 py-3.5 md:py-4 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl md:rounded-2xl font-bold text-base md:text-xl shadow-lg transition">Finalizar Tarea <i class="fas fa-arrow-right ml-2"></i></button>' : 
+                            '<button onclick="startMegaQuiz()" class="w-full sm:w-auto px-6 md:px-8 py-3.5 md:py-4 bg-slate-800 hover:bg-slate-900 text-white rounded-xl md:rounded-2xl font-bold text-base md:text-xl shadow-lg transition">Intentar de Nuevo <i class="fas fa-redo ml-2"></i></button>'}
+                    </div>`;
+                progress.style.width = '100%';
+                counter.innerText = 'Resultados';
+                return;
+            }
+
+            const q = megaQuizData[megaQuizCurrent];
+            progress.style.width = `${(megaQuizCurrent / megaQuizData.length) * 100}%`;
+            counter.innerText = `Pregunta ${megaQuizCurrent + 1} de ${megaQuizData.length}`;
+
+            let qTextHtml = q.q.replace('___', `<span id="mega-blank" class="inline-block px-1 border-b-4 border-dashed border-slate-300 text-yellow-500 font-bold mx-1 pb-1 min-w-[3rem] text-center transition-colors">___</span>`);
+
+            // Safe responsive grid for mega quiz options
+            let optionsHtml = q.options.map((opt, i) =>
+                `<button onclick="submitMegaQuiz(${i})" class="mega-opt w-full py-4 md:py-5 bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 hover:border-yellow-400 rounded-xl md:rounded-2xl text-lg md:text-xl font-bold text-slate-700 transition shadow-sm hover:-translate-y-0.5">${opt}</button>`
+            ).join('');
+
+            container.innerHTML = `
+                <div class="fade-in">
+                    <h3 class="text-xl sm:text-2xl md:text-4xl font-medium text-slate-800 mb-6 md:mb-10 leading-relaxed text-center">${qTextHtml}</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4" id="mega-options">
+                        ${optionsHtml}
+                    </div>
+                    <div id="mega-feedback" class="mt-6 md:mt-8 text-center text-base md:text-xl font-bold hidden p-4 md:p-5 rounded-xl md:rounded-2xl"></div>
+                </div>
+            `;
+        }
+
+        function submitMegaQuiz(selectedIndex) {
+            const q = megaQuizData[megaQuizCurrent];
+            const buttons = document.querySelectorAll('.mega-opt');
+            const feedback = document.getElementById('mega-feedback');
+            const blank = document.getElementById('mega-blank');
+
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-slate-100', 'hover:border-yellow-400', 'hover:-translate-y-0.5');
+            });
+
+            if(selectedIndex === q.answer) {
+                megaQuizScore++;
+                buttons[selectedIndex].classList.replace('bg-slate-50', 'bg-green-500');
+                buttons[selectedIndex].classList.replace('text-slate-700', 'text-white');
+                buttons[selectedIndex].classList.replace('border-slate-200', 'border-green-600');
+                if(blank) {
+                    blank.innerText = q.options[q.answer];
+                    blank.classList.replace('border-slate-300', 'border-green-500');
+                    blank.classList.replace('text-yellow-500', 'text-green-600');
+                }
+                feedback.classList.remove('hidden');
+                feedback.classList.add('bg-green-50', 'text-green-700', 'border', 'border-green-200', 'fade-in');
+                feedback.innerHTML = '<i class="fas fa-check-circle"></i> ¡Correcto!';
+            } else {
+                buttons[selectedIndex].classList.replace('bg-slate-50', 'bg-red-500');
+                buttons[selectedIndex].classList.replace('text-slate-700', 'text-white');
+                buttons[selectedIndex].classList.replace('border-slate-200', 'border-red-600');
+                
+                buttons[q.answer].classList.replace('bg-slate-50', 'bg-green-100');
+                buttons[q.answer].classList.replace('border-slate-200', 'border-green-400');
+                
+                feedback.classList.remove('hidden');
+                feedback.classList.add('bg-red-50', 'text-red-700', 'border', 'border-red-200', 'fade-in');
+                feedback.innerHTML = '<i class="fas fa-times-circle"></i> Incorrecto.';
+            }
+
+            setTimeout(() => {
+                megaQuizCurrent++;
+                renderMegaQuizQuestion();
+            }, 1500);
+        }
+
+        function renderDictionaryList(dataArray, containerId) {
+            const container = document.getElementById(containerId);
+            if(!container) return;
+            let html = '';
+            dataArray.forEach(item => {
+                html += `
+                <div class="bg-white border border-slate-200 p-2.5 md:p-4 rounded-xl md:rounded-2xl flex items-center gap-2.5 md:gap-3 hover:shadow-md hover:border-sky-300 transition-all cursor-pointer group" onclick="playAudio(event, '${item.en.replace(/'/g, "\\'")}')">
+                    <div class="text-xl md:text-3xl bg-slate-50 w-10 h-10 md:w-14 md:h-14 rounded-lg md:rounded-xl flex items-center justify-center shrink-0 border border-slate-100 shadow-sm">${item.emoji}</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-slate-800 text-sm md:text-base truncate">${item.en}</p>
+                        <p class="text-xs md:text-sm text-slate-500 font-medium truncate">${item.es}</p>
+                    </div>
+                    <div class="w-7 h-7 md:w-10 md:h-10 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 group-hover:bg-sky-500 group-hover:text-white transition-colors">
+                        <i class="fas fa-volume-up text-[10px] md:text-sm"></i>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function toggleDictionary() {
+            const modal = document.getElementById('dictionary-modal');
+            const box = document.getElementById('dictionary-box');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    box.classList.remove('scale-95');
+                }, 10);
+            } else {
+                modal.classList.add('opacity-0');
+                box.classList.add('scale-95');
+                setTimeout(() => { modal.classList.add('hidden'); }, 300);
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.dict-tab').forEach(t => {
+                t.classList.remove('active', 'text-sky-600', 'border-sky-600');
+                t.classList.add('text-slate-500', 'border-transparent');
+            });
+            event.currentTarget.classList.remove('text-slate-500', 'border-transparent');
+            event.currentTarget.classList.add('active', 'text-sky-600', 'border-sky-600');
+            
+            document.querySelectorAll('.dict-content').forEach(c => c.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+        }
+
+        // Keyboard navigation setup
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('dictionary-modal').classList.contains('hidden')) {
+                if (e.key === 'ArrowRight') nextSlide();
+                if (e.key === 'ArrowLeft') prevSlide();
+            }
+        });
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            slides = document.querySelectorAll('.slide');
+            progressBar = document.getElementById('progress-bar');
+            progressText = document.getElementById('progress-text');
+            btnPrev = document.getElementById('btn-prev');
+            btnNext = document.getElementById('btn-next');
+            mainContainer = document.getElementById('main-scroll-area');
+
+            // Render Dict
+            renderDictionaryList(dictData.feelings, 'dict-feelings');
+            renderDictionaryList(dictData.adjectives, 'dict-adjectives');
+            renderDictionaryList(dictData.questions, 'dict-questions');
+            
+            // Render Quizzes
+            renderQuiz('quiz-l3', 'l3-quiz');
+            renderQuiz('quiz-conversation', 'quiz-conversation');
+            
+            updateUI();
+        });
+
+    </script>
+</body>
+</html>
