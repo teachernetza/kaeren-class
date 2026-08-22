@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reto: Presente Continuo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+        
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: #0f172a; 
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 15px 35px -5px rgba(2, 132, 199, 0.05), 0 10px 15px -6px rgba(2, 132, 199, 0.02);
+            border-radius: 1.5rem;
+        }
+        
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.9);
+        }
+
+        .btn-press {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-press:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .inline-select {
+            -webkit-appearance: none; appearance: none;
+            background: white; border: 2px dashed #94a3b8; color: #475569;
+            padding: 0.25rem 1rem; border-radius: 0.5rem; font-weight: 700;
+            cursor: pointer; transition: all 0.2s; outline: none;
+            text-align: center;
+        }
+        .inline-select:focus { border-color: #0284c7; border-style: solid; box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15); }
+        .inline-select.correct { border-color: #10b981; border-style: solid; background: #ecfdf5; color: #065f46; pointer-events: none; }
+        .inline-select.incorrect { border-color: #ef4444; border-style: solid; background: #fef2f2; color: #991b1b; animation: shake 0.4s; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .score-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white; padding: 0.4rem 1rem; border-radius: 9999px; font-weight: 800;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .score-bump { transform: scale(1.15); }
+
+        .chat-bubble-left {
+            background: #ffffff; border-radius: 1.25rem 1.25rem 1.25rem 0;
+            padding: 1rem; max-width: 85%; margin-bottom: 1rem;
+            border: 2px solid #f1f5f9; box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+        .chat-bubble-right {
+            background: #e0f2fe; border-radius: 1.25rem 1.25rem 0 1.25rem;
+            padding: 1rem; max-width: 85%; margin-bottom: 1rem; margin-left: auto;
+            border: 2px solid #bae6fd; color: #0369a1; box-shadow: 0 4px 6px rgba(2,132,199,0.05);
+        }
+
+        /* Dictionary Modal */
+        #dictionary-modal.active { display: flex; animation: fadeIn 0.3s ease-out forwards; }
+        #dictionary-modal { display: none; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="pb-24">
+
+    <nav class="fixed top-0 w-full glass-header z-40 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-sky-600 rounded-xl flex items-center justify-center text-white text-lg shadow-md">
+                    <i class="fas fa-play-circle"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-slate-800 leading-none text-lg">Presente Continuo</h1>
+                    <p class="text-[10px] font-bold text-sky-500 uppercase tracking-widest mt-0.5">Grammar Lab</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 md:gap-4">
+                <button onclick="toggleDictionary()" class="bg-white text-sky-600 hover:bg-sky-50 px-3 py-1.5 rounded-full text-sm font-bold border-2 border-sky-100 transition btn-press flex items-center shadow-sm">
+                    <i class="fas fa-book"></i><span class="hidden md:inline ml-2">Diccionario</span>
+                </button>
+                <div class="score-badge flex items-center gap-1.5 text-sm md:text-base" id="score-container">
+                    <i class="fas fa-star text-yellow-300"></i>
+                    <span id="score-display">0</span> <span class="text-emerald-100 text-xs md:text-sm">/ 200</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="dictionary-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 justify-center items-center p-4">
+        <div class="bg-white w-full max-w-4xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+            <div class="p-4 md:p-6 border-b-2 border-slate-100 flex justify-between items-center bg-slate-50">
+                <h2 class="text-xl md:text-2xl font-black text-slate-800"><i class="fas fa-book text-sky-500 mr-2"></i> Diccionario del Laboratorio</h2>
+                <button onclick="toggleDictionary()" class="w-10 h-10 flex justify-center items-center bg-slate-200 hover:bg-rose-100 hover:text-rose-600 rounded-full text-slate-600 transition">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            <div class="p-4 md:p-6 overflow-y-auto flex-grow bg-slate-50">
+                <p class="text-slate-600 font-medium text-sm mb-4">Usa este vocabulario para completar los ejercicios.</p>
+                
+                <div class="grid md:grid-cols-2 gap-4">
+                    <!-- 12 Action Verbs -->
+                    <div class="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm">
+                        <h3 class="font-bold text-amber-500 mb-3 text-lg"><i class="fas fa-bolt mr-2"></i> Verbos de Acción (12)</h3>
+                        <ul class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm font-medium">
+                            <li class="flex justify-between items-center"><span class="text-slate-800">Cook ➡️ Cooking</span> <span>🍳</span></li>
+                            <li class="flex justify-between items-center"><span class="text-slate-800">Watch ➡️ Watching</span> <span>📺</span></li>
+                            <li class="flex justify-between items-center"><span class="text-slate-800">Play ➡️ Playing</span> <span>🎮</span></li>
+                            <li class="flex justify-between items-center"><span class="text-slate-800">Read ➡️ Reading</span> <span>📖</span></li>
+                            <li class="flex justify-between items-center"><span class="text-slate-800">Work ➡️ Working</span> <span>💻</span></li>
+                            <li class="flex justify-between items-center"><span class="text-slate-800">Listen ➡️ Listening</span> <span>🎧</span></li>
+                            <li class="flex justify-between items-center"><span class="text-slate-800">Run ➡️ Running</span> <span>🏃</span></li>
+                            <li class="flex justify-between items-center"><span class="text-slate-800">Sleep ➡️ Sleeping</span> <span>💤</span></li>
+                            <li class="flex justify-between items-center"><span class="text-slate-800">Write ➡️ Writing</span> <span>✍️</span></li>
+                            <li class="flex justify-between items-center"><span class="text-slate-800">Eat ➡️ Eating</span> <span>🍕</span></li>
+                            <li class="flex justify-between items-center"><span class="text-slate-800">Drink ➡️ Drinking</span> <span>💧</span></li>
+                            <li class="flex justify-between items-center"><span class="text-slate-800">Study ➡️ Studying</span> <span>📚</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- 18 Vocabulary Words -->
+                    <div class="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm">
+                        <h3 class="font-bold text-sky-500 mb-3 text-lg"><i class="fas fa-book-open mr-2"></i> Vocabulario (18)</h3>
+                        
+                        <b class="text-xs text-slate-400 uppercase tracking-widest block mb-2">Expresiones de Tiempo</b>
+                        <ul class="space-y-1 text-sm font-medium mb-3">
+                            <li class="flex justify-between"><b class="text-slate-800">Now</b> <span class="text-slate-500">Ahora</span></li>
+                            <li class="flex justify-between"><b class="text-slate-800">Right now</b> <span class="text-slate-500">Justo ahora</span></li>
+                            <li class="flex justify-between"><b class="text-slate-800">At the moment</b> <span class="text-slate-500">En este momento</span></li>
+                            <li class="flex justify-between"><b class="text-slate-800">Today</b> <span class="text-slate-500">Hoy</span></li>
+                        </ul>
+
+                        <b class="text-xs text-slate-400 uppercase tracking-widest block mb-2">Lugares y Objetos</b>
+                        <ul class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm font-medium">
+                            <li class="flex justify-between"><span class="text-slate-800">At home</span> <span class="text-slate-500">En casa</span></li>
+                            <li class="flex justify-between"><span class="text-slate-800">At the park</span> <span class="text-slate-500">En el parque</span></li>
+                            <li class="flex justify-between"><span class="text-slate-800">At school</span> <span class="text-slate-500">En la escuela</span></li>
+                            <li class="flex justify-between"><span class="text-slate-800">In the kitchen</span> <span class="text-slate-500">En la cocina</span></li>
+                            <li class="flex justify-between"><span class="text-slate-800">Book</span> <span class="text-slate-500">Libro</span></li>
+                            <li class="flex justify-between"><span class="text-slate-800">Breakfast</span> <span class="text-slate-500">Desayuno</span></li>
+                            <li class="flex justify-between"><span class="text-slate-800">Coffee</span> <span class="text-slate-500">Café</span></li>
+                            <li class="flex justify-between"><span class="text-slate-800">Music</span> <span class="text-slate-500">Música</span></li>
+                            <li class="flex justify-between"><span class="text-slate-800">TV</span> <span class="text-slate-500">Televisión</span></li>
+                            <li class="flex justify-between"><span class="text-slate-800">Dog</span> <span class="text-slate-500">Perro</span></li>
+                            <li class="flex justify-between"><span class="text-slate-800">Friend</span> <span class="text-slate-500">Amigo/a</span></li>
+                            <li class="flex justify-between"><span class="text-slate-800">Sister</span> <span class="text-slate-500">Hermana</span></li>
+                            <li class="flex justify-between"><span class="text-slate-800">Parents</span> <span class="text-slate-500">Padres</span></li>
+                            <li class="flex justify-between"><span class="text-slate-800">Pizza</span> <span class="text-slate-500">Pizza</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t-2 border-slate-100 bg-white">
+                <button onclick="toggleDictionary()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 rounded-xl transition btn-press text-lg">¡Entendido!</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-4xl mx-auto px-4 pt-24 space-y-12">
+
+        <header class="text-center py-6">
+            <div class="inline-block mb-4 p-3 bg-white rounded-full shadow-sm border border-sky-100">
+                <span class="text-4xl">🏃‍♂️ 👀 📱</span>
+            </div>
+            <h2 class="text-4xl md:text-5xl font-black text-slate-800 mb-4 tracking-tight">¿Qué está pasando <span class="text-sky-500">Ahora?</span></h2>
+            <p class="text-slate-600 font-medium max-w-2xl mx-auto text-lg leading-relaxed">
+                Aprende a describir acciones que están sucediendo <b>justo en este momento</b>. Desplázate hacia abajo para revisar la gramática, completar los retos en inglés y ganar puntos.
+            </p>
+        </header>
+
+        <section class="glass p-6 md:p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-sky-400 rounded-full mix-blend-multiply filter blur-3xl opacity-10 -mr-10 -mt-10"></div>
+            
+            <h3 class="text-2xl font-black text-slate-800 mb-2 uppercase tracking-wide"><i class="fas fa-magic text-sky-500 mr-2"></i> 1. La Fórmula</h3>
+            <p class="text-slate-600 text-sm font-medium mb-6">Para construir oraciones afirmativas en Presente Continuo, necesitamos 3 elementos clave:</p>
+            
+            <div class="flex flex-col md:flex-row gap-4 mb-6">
+                <!-- Subject + To Be -->
+                <div class="flex-1 bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Sujeto + Verbo To Be</p>
+                    <div class="space-y-2">
+                        <div class="bg-amber-50 text-amber-900 font-bold py-2 px-3 rounded-lg border border-amber-100 flex justify-between"><span>I</span> <span>am</span></div>
+                        <div class="bg-emerald-50 text-emerald-900 font-bold py-2 px-3 rounded-lg border border-emerald-100 flex justify-between"><span>He/She/It</span> <span>is</span></div>
+                        <div class="bg-rose-50 text-rose-900 font-bold py-2 px-3 rounded-lg border border-rose-100 flex justify-between"><span>You/We/They</span> <span>are</span></div>
+                    </div>
+                </div>
+                
+                <div class="hidden md:flex justify-center items-center text-3xl font-black text-slate-300">+</div>
+                <div class="md:hidden flex justify-center items-center text-3xl font-black text-slate-300 my-2">+</div>
+
+                <!-- Verb-ing -->
+                <div class="flex-1 bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center flex flex-col justify-center items-center">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Verbo Principal</p>
+                    <div class="bg-sky-500 text-white font-black py-3 px-8 rounded-2xl text-2xl shadow-md w-full">
+                        verb-ing
+                    </div>
+                    <p class="text-sm text-slate-500 mt-2 font-medium">ej. play<b>ing</b>, eat<b>ing</b>, run<b>ning</b></p>
+                </div>
+            </div>
+
+            <div class="bg-sky-50 p-4 rounded-xl border border-sky-100 flex items-center gap-4">
+                <div class="text-2xl">💡</div>
+                <p class="text-slate-700 font-medium">
+                    <b>Ejemplo:</b> She <b>is</b> work<b>ing</b> at the office right now.<br>
+                    <span class="text-xs text-slate-500">(Ella está trabajando en la oficina justo ahora.)</span>
+                </p>
+            </div>
+        </section>
+
+        <section class="glass p-6 md:p-8 relative overflow-hidden border-t-4 border-sky-400">
+            <h3 class="text-2xl font-black text-slate-800 mb-2 uppercase tracking-wide"><i class="fas fa-cubes text-sky-500 mr-2"></i> 2. Bloques Prácticos</h3>
+            <p class="text-slate-600 text-sm font-medium mb-6">Para decir que "no" o hacer preguntas, usa estos bloques prearmados y solo agrega tu verbo con <b>-ing</b> al final.</p>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Negatives -->
+                <div class="bg-rose-50/50 p-5 rounded-2xl border border-rose-100 shadow-sm">
+                    <h4 class="font-bold text-rose-700 mb-3 uppercase tracking-wide text-sm flex items-center"><div class="w-6 h-6 bg-rose-200 text-rose-700 rounded-full flex items-center justify-center mr-2"><i class="fas fa-minus text-xs"></i></div> Forma Negativa</h4>
+                    <ul class="space-y-3 font-medium text-slate-700">
+                        <li class="flex items-center gap-2"><span class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 font-bold text-rose-600 shadow-sm">I am not</span> <span>working.</span></li>
+                        <li class="flex items-center gap-2"><span class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 font-bold text-rose-600 shadow-sm">He is not</span> <span>sleeping.</span></li>
+                        <li class="flex items-center gap-2"><span class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 font-bold text-rose-600 shadow-sm">They are not</span> <span>reading.</span></li>
+                    </ul>
+                </div>
+                <!-- Questions -->
+                <div class="bg-purple-50/50 p-5 rounded-2xl border border-purple-100 shadow-sm">
+                    <h4 class="font-bold text-purple-700 mb-3 uppercase tracking-wide text-sm flex items-center"><div class="w-6 h-6 bg-purple-200 text-purple-700 rounded-full flex items-center justify-center mr-2"><i class="fas fa-question text-xs"></i></div> Preguntas</h4>
+                    <ul class="space-y-3 font-medium text-slate-700">
+                        <li class="flex items-center gap-2"><span class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 font-bold text-purple-600 shadow-sm">Are you</span> <span>working?</span></li>
+                        <li class="flex items-center gap-2"><span class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 font-bold text-purple-600 shadow-sm">Is he</span> <span>sleeping?</span></li>
+                        <li class="flex items-center gap-2"><span class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 font-bold text-purple-600 shadow-sm">What are you</span> <span>reading?</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass p-6 md:p-8 border-t-4 border-t-amber-400 bg-amber-50/30">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-wide">Reto 1: A Busy Morning</h3>
+                <span class="text-xs font-bold bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full shadow-sm">40 PTS</span>
+            </div>
+            <p class="text-slate-600 mb-6 text-sm font-medium">Selecciona la forma correcta del verbo para describir lo que está pasando en la casa en este momento (inglés).</p>
+
+            <div class="bg-white p-6 md:p-8 rounded-2xl leading-loose text-base md:text-lg font-medium text-slate-700 shadow-md border border-slate-100">
+                It is Saturday morning. I 
+                <select class="inline-select mx-1 shadow-sm" onchange="Logic.checkInline(this, 'am drinking', 10)">
+                    <option value="" disabled selected>[ Select ]</option>
+                    <option value="are drinking">are drinking</option>
+                    <option value="am drinking">am drinking</option>
+                    <option value="is drinking">is drinking</option>
+                </select>
+                coffee in the kitchen. My sister 
+                <select class="inline-select mx-1 shadow-sm" onchange="Logic.checkInline(this, 'is sleeping', 10)">
+                    <option value="" disabled selected>[ Select ]</option>
+                    <option value="am sleeping">am sleeping</option>
+                    <option value="is sleeping">is sleeping</option>
+                    <option value="are sleeping">are sleeping</option>
+                </select>
+                in her bedroom. My parents 
+                <select class="inline-select mx-1 shadow-sm" onchange="Logic.checkInline(this, 'are cooking', 10)">
+                    <option value="" disabled selected>[ Select ]</option>
+                    <option value="is cooking">is cooking</option>
+                    <option value="are cooking">are cooking</option>
+                    <option value="am cooking">am cooking</option>
+                </select>
+                breakfast for everyone. The dog 
+                <select class="inline-select mx-1 shadow-sm" onchange="Logic.checkInline(this, 'is running', 10)">
+                    <option value="" disabled selected>[ Select ]</option>
+                    <option value="is running">is running</option>
+                    <option value="are running">are running</option>
+                    <option value="is runing">is runing</option>
+                </select>
+                in the park with my brother.
+            </div>
+        </section>
+
+        <section class="glass p-6 md:p-8 border-t-4 border-t-emerald-500 bg-emerald-50/30">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-wide">Reto 2: Chat Comprehension</h3>
+                <span class="text-xs font-bold bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full shadow-sm">40 PTS</span>
+            </div>
+            <p class="text-slate-600 mb-6 text-sm font-medium">Lee los mensajes de texto entre David y Emma. Luego, responde las preguntas.</p>
+
+            <div class="bg-white p-4 md:p-6 rounded-2xl mb-8 shadow-sm border border-slate-100">
+                <div class="chat-bubble-left">
+                    <p class="text-xs font-bold text-slate-400 uppercase mb-1">David 👦🏽</p>
+                    <p class="text-slate-700 font-medium">Hey Emma! What are you doing right now?</p>
+                </div>
+                
+                <div class="chat-bubble-right">
+                    <p class="text-xs font-bold text-sky-500 uppercase mb-1 text-right">👩🏻 Emma</p>
+                    <p class="font-medium">Hi! I <b>am studying</b> at school. 📚 Are you working today?</p>
+                </div>
+
+                <div class="chat-bubble-left">
+                    <p class="text-xs font-bold text-slate-400 uppercase mb-1">David 👦🏽</p>
+                    <p class="text-slate-700 font-medium">No, I <b>am not working</b> today. I <b>am playing</b> music at home. 🎸</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="font-bold text-slate-700 mb-3 text-base md:text-lg">1. What is Emma doing?</p>
+                    <div class="flex flex-col gap-3" id="mc-group-1">
+                        <button onclick="Logic.checkMC(this, 'mc-group-1', true, 20)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-3 px-4 rounded-xl hover:bg-slate-100 transition">She is studying at school.</button>
+                        <button onclick="Logic.checkMC(this, 'mc-group-1', false, 20)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-3 px-4 rounded-xl hover:bg-slate-100 transition">She is playing music.</button>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="font-bold text-slate-700 mb-3 text-base md:text-lg">2. Is David working right now?</p>
+                    <div class="flex flex-col gap-3" id="mc-group-2">
+                        <button onclick="Logic.checkMC(this, 'mc-group-2', false, 20)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-3 px-4 rounded-xl hover:bg-slate-100 transition">Yes, he is working.</button>
+                        <button onclick="Logic.checkMC(this, 'mc-group-2', true, 20)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-3 px-4 rounded-xl hover:bg-slate-100 transition">No, he is not working. He is playing music.</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass p-6 md:p-8 border-t-4 border-t-teal-500 bg-teal-50/30">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-wide">Reto 3: Are you busy?</h3>
+                <span class="text-xs font-bold bg-teal-100 text-teal-700 px-3 py-1.5 rounded-full shadow-sm">45 PTS</span>
+            </div>
+            <p class="text-slate-600 mb-6 text-sm font-medium">Lee los mensajes de texto entre Alex y Sarah. Presta atención a las preguntas y negaciones.</p>
+
+            <div class="bg-white p-4 md:p-6 rounded-2xl mb-8 shadow-sm border border-slate-100">
+                <div class="chat-bubble-left">
+                    <p class="text-xs font-bold text-slate-400 uppercase mb-1">Alex 🧑🏼</p>
+                    <p class="text-slate-700 font-medium">Hi Sarah! <b>Are you studying</b> right now?</p>
+                </div>
+                
+                <div class="chat-bubble-right">
+                    <p class="text-xs font-bold text-sky-500 uppercase mb-1 text-right">👱🏻‍♀️ Sarah</p>
+                    <p class="font-medium">No, I <b>am not studying</b>. I <b>am watching TV</b>. 📺 What about you?</p>
+                </div>
+
+                <div class="chat-bubble-left">
+                    <p class="text-xs font-bold text-slate-400 uppercase mb-1">Alex 🧑🏼</p>
+                    <p class="text-slate-700 font-medium">I <b>am eating pizza</b> with my parents. 🍕 <b>Is your sister watching TV</b> with you?</p>
+                </div>
+
+                <div class="chat-bubble-right">
+                    <p class="text-xs font-bold text-sky-500 uppercase mb-1 text-right">👱🏻‍♀️ Sarah</p>
+                    <p class="font-medium">No, she <b>is not watching TV</b>. She <b>is sleeping</b>. 💤</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="font-bold text-slate-700 mb-3 text-base md:text-lg">1. Is Sarah studying right now?</p>
+                    <div class="flex flex-col gap-3" id="mc-group-3">
+                        <button onclick="Logic.checkMC(this, 'mc-group-3', false, 15)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-3 px-4 rounded-xl hover:bg-slate-100 transition">Yes, she is studying.</button>
+                        <button onclick="Logic.checkMC(this, 'mc-group-3', true, 15)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-3 px-4 rounded-xl hover:bg-slate-100 transition">No, she is not studying. She is watching TV.</button>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="font-bold text-slate-700 mb-3 text-base md:text-lg">2. What is Alex doing?</p>
+                    <div class="flex flex-col gap-3" id="mc-group-4">
+                        <button onclick="Logic.checkMC(this, 'mc-group-4', true, 15)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-3 px-4 rounded-xl hover:bg-slate-100 transition">He is eating pizza with his parents.</button>
+                        <button onclick="Logic.checkMC(this, 'mc-group-4', false, 15)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-3 px-4 rounded-xl hover:bg-slate-100 transition">He is watching TV with his sister.</button>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="font-bold text-slate-700 mb-3 text-base md:text-lg">3. Is Sarah's sister watching TV?</p>
+                    <div class="flex flex-col gap-3" id="mc-group-5">
+                        <button onclick="Logic.checkMC(this, 'mc-group-5', false, 15)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-3 px-4 rounded-xl hover:bg-slate-100 transition">Yes, she is watching TV.</button>
+                        <button onclick="Logic.checkMC(this, 'mc-group-5', true, 15)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-3 px-4 rounded-xl hover:bg-slate-100 transition">No, she is sleeping.</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass p-6 md:p-8 border-t-4 border-t-rose-500 bg-rose-50/30">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-wide">Reto 4: What are they doing?</h3>
+                <span class="text-xs font-bold bg-rose-100 text-rose-700 px-3 py-1.5 rounded-full shadow-sm">30 PTS</span>
+            </div>
+            <p class="text-slate-600 mb-6 text-sm font-medium">Mira los emojis y elige la oración correcta que describe la acción.</p>
+
+            <div class="space-y-5">
+                <!-- Q1 -->
+                <div class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row items-center gap-4">
+                    <div class="text-5xl bg-slate-50 p-4 rounded-2xl border border-slate-100 w-full md:w-auto text-center">🎧 🎵</div>
+                    <div class="flex-grow w-full space-y-2" id="mc-group-6">
+                        <button onclick="Logic.checkMC(this, 'mc-group-6', false, 10)" class="w-full btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-2 px-4 rounded-xl hover:bg-slate-100 transition">He is watching TV.</button>
+                        <button onclick="Logic.checkMC(this, 'mc-group-6', true, 10)" class="w-full btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-2 px-4 rounded-xl hover:bg-slate-100 transition">He is listening to music.</button>
+                    </div>
+                </div>
+                
+                <!-- Q2 -->
+                <div class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row items-center gap-4">
+                    <div class="text-5xl bg-slate-50 p-4 rounded-2xl border border-slate-100 w-full md:w-auto text-center">📖 🧐</div>
+                    <div class="flex-grow w-full space-y-2" id="mc-group-7">
+                        <button onclick="Logic.checkMC(this, 'mc-group-7', true, 10)" class="w-full btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-2 px-4 rounded-xl hover:bg-slate-100 transition">She is reading a book.</button>
+                        <button onclick="Logic.checkMC(this, 'mc-group-7', false, 10)" class="w-full btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-2 px-4 rounded-xl hover:bg-slate-100 transition">She is writing a book.</button>
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row items-center gap-4">
+                    <div class="text-5xl bg-slate-50 p-4 rounded-2xl border border-slate-100 w-full md:w-auto text-center">🍕 😋</div>
+                    <div class="flex-grow w-full space-y-2" id="mc-group-8">
+                        <button onclick="Logic.checkMC(this, 'mc-group-8', false, 10)" class="w-full btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-2 px-4 rounded-xl hover:bg-slate-100 transition">They are drinking water.</button>
+                        <button onclick="Logic.checkMC(this, 'mc-group-8', true, 10)" class="w-full btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-medium py-2 px-4 rounded-xl hover:bg-slate-100 transition">They are eating pizza.</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass p-6 md:p-8 border-t-4 border-t-purple-500 bg-purple-50/30">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-wide">Reto 5: Choose the Block</h3>
+                <span class="text-xs font-bold bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full shadow-sm">45 PTS</span>
+            </div>
+            <p class="text-slate-600 mb-6 text-sm font-medium">Selecciona el bloque correcto (inicio de oración) para completar el sentido lógico.</p>
+
+            <div class="space-y-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="font-bold text-slate-700 mb-4 text-base md:text-lg">1. "[ ______ ] listening to music?"</p>
+                    <div class="flex flex-col gap-3" id="mc-group-9">
+                        <button onclick="Logic.checkMC(this, 'mc-group-9', false, 15)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-100 transition">You are</button>
+                        <button onclick="Logic.checkMC(this, 'mc-group-9', true, 15)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-100 transition">Are you</button>
+                        <button onclick="Logic.checkMC(this, 'mc-group-9', false, 15)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-100 transition">Am you</button>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="font-bold text-slate-700 mb-4 text-base md:text-lg">2. "Where is Mark? [ ______ ] working today?"</p>
+                    <div class="flex flex-col gap-3" id="mc-group-10">
+                        <button onclick="Logic.checkMC(this, 'mc-group-10', true, 15)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-100 transition">Is he</button>
+                        <button onclick="Logic.checkMC(this, 'mc-group-10', false, 15)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-100 transition">He is</button>
+                        <button onclick="Logic.checkMC(this, 'mc-group-10', false, 15)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-100 transition">Are he</button>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="font-bold text-slate-700 mb-4 text-base md:text-lg">3. "I want to go to the park, but [ ______ ] reading a book right now."</p>
+                    <div class="flex flex-col gap-3" id="mc-group-11">
+                        <button onclick="Logic.checkMC(this, 'mc-group-11', false, 15)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-100 transition">I am not</button>
+                        <button onclick="Logic.checkMC(this, 'mc-group-11', true, 15)" class="btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-100 transition">I am</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="text-center pt-8">
+            <button onclick="Logic.showResults()" class="btn-press bg-sky-600 hover:bg-sky-700 text-white font-black py-5 px-10 md:px-12 rounded-2xl shadow-[0_10px_25px_rgba(2,132,199,0.3)] text-lg md:text-xl uppercase tracking-widest border border-sky-500 w-full md:w-auto">
+                <i class="fas fa-flag-checkered mr-2"></i> Finalizar y Ver Puntaje
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Results Modal -->
+    <div id="results-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden justify-center items-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl flex flex-col items-center text-center p-8 md:p-10 transform scale-95 transition-transform" id="modal-content">
+            <div class="w-24 h-24 bg-gradient-to-tr from-sky-100 to-sky-200 text-sky-600 rounded-full flex items-center justify-center text-5xl mb-4 shadow-inner border-4 border-white" id="icon-container">
+                <i class="fas fa-trophy" id="result-icon"></i>
+            </div>
+            <h2 class="text-3xl font-black text-slate-800 mb-1">Puntaje Total</h2>
+            <div class="text-5xl font-black text-sky-600 mb-3"><span id="final-score-val">0</span><span class="text-2xl text-slate-400">/200</span></div>
+            
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 w-full text-left">
+                <p class="text-amber-800 font-bold text-sm mb-1"><i class="fas fa-camera mr-1"></i> Tarea del Profesor:</p>
+                <p class="text-amber-700 text-xs font-medium leading-relaxed">¡Toma una captura de pantalla (screenshot) de este resultado y envíala a tu profesor para registrar tu progreso!</p>
+            </div>
+
+            <p class="text-slate-500 font-medium text-sm md:text-base mb-6" id="result-message">¡Gran esfuerzo!</p>
+            <button onclick="location.reload()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 rounded-xl transition btn-press text-base uppercase tracking-wide">
+                <i class="fas fa-redo mr-2"></i> Reintentar Laboratorio
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DICTIONARY TOGGLE ---
+        function toggleDictionary() {
+            const modal = document.getElementById('dictionary-modal');
+            if (modal.classList.contains('active')) {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto'; // restore scroll
+            } else {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden'; // prevent background scroll
+            }
+        }
+
+        // --- SCORING & INTERACTION LOGIC ---
+        const Logic = {
+            score: 0,
+            maxScore: 200, // Updated max score based on new exercises
+            
+            addScore(points) {
+                this.score += points;
+                const display = document.getElementById('score-display');
+                const container = document.getElementById('score-container');
+                display.innerText = this.score;
+                
+                // Animation bump
+                container.classList.add('score-bump');
+                setTimeout(() => container.classList.remove('score-bump'), 300);
+            },
+            
+            checkInline(element, correctAnswer, points) {
+                if(element.dataset.answered === 'true') return;
+                
+                if(element.value === correctAnswer) {
+                    element.classList.add('correct');
+                    element.dataset.answered = 'true';
+                    this.addScore(points);
+                } else {
+                    element.classList.add('incorrect');
+                    setTimeout(() => {
+                        element.classList.remove('incorrect');
+                        element.value = "";
+                    }, 500);
+                }
+            },
+
+            checkMC(button, groupId, isCorrect, points) {
+                const group = document.getElementById(groupId);
+                if(group.dataset.answered === 'true') return;
+
+                const buttons = group.querySelectorAll('button');
+                
+                if(isCorrect) {
+                    button.className = "w-full text-left bg-emerald-50 border-2 border-emerald-500 text-emerald-800 font-bold py-3 px-4 rounded-xl text-base shadow-sm";
+                    group.dataset.answered = 'true';
+                    this.addScore(points);
+                    buttons.forEach(b => { if(b !== button) b.classList.add('opacity-40', 'pointer-events-none'); });
+                } else {
+                    button.className = "w-full text-left bg-red-50 border-2 border-red-400 text-red-800 font-bold py-3 px-4 rounded-xl text-base shadow-sm transition-all";
+                    setTimeout(() => {
+                        button.className = "w-full btn-press text-left bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-100 transition";
+                    }, 800);
+                }
+            },
+
+            showResults() {
+                const modal = document.getElementById('results-modal');
+                const content = document.getElementById('modal-content');
+                const finalScore = document.getElementById('final-score-val');
+                const msg = document.getElementById('result-message');
+                const icon = document.getElementById('result-icon');
+                const iconContainer = document.getElementById('icon-container');
+                
+                finalScore.innerText = this.score;
+                
+                if(this.score === this.maxScore) {
+                    msg.innerHTML = "<b class='text-emerald-600'>¡Excelente trabajo!</b> Has dominado el uso del Presente Continuo a la perfección.";
+                    icon.className = "fas fa-crown";
+                    iconContainer.className = "w-24 h-24 bg-gradient-to-tr from-yellow-300 to-yellow-500 text-white rounded-full flex items-center justify-center text-5xl mb-4 shadow-xl border-4 border-white";
+                } else if(this.score >= 150) { // Adjusted threshold
+                    msg.innerHTML = "<b class='text-sky-600'>¡Muy bien hecho!</b> Tienes un buen dominio de la gramática.";
+                    icon.className = "fas fa-medal";
+                } else {
+                    msg.innerHTML = "¡Sigue practicando! Repasa la fórmula y los bloques del principio e inténtalo de nuevo.";
+                    icon.className = "fas fa-book-reader";
+                }
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                setTimeout(() => content.classList.remove('scale-95'), 10);
+            }
+        };
+    </script>
+</body>
+</html>
