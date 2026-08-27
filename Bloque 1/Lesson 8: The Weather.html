@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Weather & To Be: The Rules Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+        
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: #1e293b; 
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Glassmorphism Containers */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.05), 0 10px 15px -6px rgba(0, 0, 0, 0.02);
+            border-radius: 1.5rem;
+        }
+        
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.9);
+        }
+
+        .btn-press { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-press:active:not(:disabled) { transform: scale(0.95); }
+
+        /* Compact Flip Cards for Dictionary */
+        .flip-card { perspective: 1000px; height: 150px; }
+        .flip-card-inner {
+            position: relative; width: 100%; height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+            transform-style: preserve-3d; cursor: pointer;
+        }
+        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            border-radius: 1rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0.75rem;
+        }
+        .flip-card-front { background: rgba(255,255,255,0.95); border: 2px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        
+        /* Category Colors */
+        .weather-back { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; transform: rotateY(180deg); border: 2px solid #38bdf8; }
+        .grammar-back { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; transform: rotateY(180deg); border: 2px solid #a78bfa; }
+        .modifier-back { background: linear-gradient(135deg, #10b981, #059669); color: white; transform: rotateY(180deg); border: 2px solid #34d399; }
+
+        /* Inline Selects */
+        .inline-select {
+            -webkit-appearance: none; appearance: none;
+            background: white; border: 2px dashed #94a3b8; color: #475569;
+            padding: 0.15rem 0.75rem; border-radius: 0.5rem; font-weight: 800;
+            cursor: pointer; transition: all 0.2s; outline: none;
+            text-align: center; font-size: 1.1rem; margin: 0 0.25rem;
+        }
+        .inline-select:focus { border-color: #6366f1; border-style: solid; box-shadow: 0 0 0 4px rgba(99,102,241,0.15); }
+        .inline-select.correct { border-color: #10b981; border-style: solid; background: #ecfdf5; color: #065f46; pointer-events: none; }
+        .inline-select.incorrect { border-color: #ef4444; border-style: solid; background: #fef2f2; color: #991b1b; animation: shake 0.4s; }
+
+        /* Block Selects (For Halves) */
+        .block-select {
+            -webkit-appearance: none; appearance: none;
+            background: white; border: 2px solid #cbd5e1; color: #334155;
+            padding: 0.75rem 1rem; border-radius: 0.75rem; font-weight: 700;
+            cursor: pointer; transition: all 0.2s; outline: none;
+            width: 100%; text-align: left; font-size: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .block-select:focus { border-color: #0ea5e9; box-shadow: 0 0 0 4px rgba(14,165,233,0.15); }
+        .block-select.correct { border-color: #10b981; background: #ecfdf5; color: #065f46; pointer-events: none; }
+        .block-select.incorrect { border-color: #ef4444; background: #fef2f2; color: #991b1b; animation: shake 0.4s; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Floating Score Badge */
+        .score-badge {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white; padding: 0.5rem 1.25rem; border-radius: 9999px; font-weight: 800;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .score-bump { transform: scale(1.15); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Rule Number Badge */
+        .rule-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            font-weight: 900;
+            margin-right: 0.75rem;
+            font-size: 1.125rem;
+        }
+
+        /* City Screenshot Cards */
+        .city-screenshot {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255,255,255,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 14rem;
+        }
+        .city-screenshot::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+            opacity: 0.3; pointer-events: none; mix-blend-mode: overlay;
+        }
+        
+        .city-content { position: relative; z-index: 10; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem;}
+    </style>
+</head>
+<body class="pb-24">
+
+    <nav class="fixed top-0 w-full glass-header z-50 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-blue-600 rounded-xl flex items-center justify-center text-white text-lg shadow-md">
+                    <i class="fas fa-cloud-sun"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-slate-800 leading-none text-lg">Weather & To Be</h1>
+                    <p class="text-[10px] font-bold text-sky-600 uppercase tracking-widest mt-0.5">The Rules Lab</p>
+                </div>
+            </div>
+            <div class="score-badge flex items-center gap-2" id="score-container">
+                <i class="fas fa-star text-yellow-300"></i>
+                <span id="score-display">0</span> <span class="text-indigo-200 text-sm">/ 135</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 pt-24 space-y-10">
+
+        <!-- Header -->
+        <header class="text-center py-6">
+            <h2 class="text-4xl md:text-5xl font-black text-slate-800 mb-4 tracking-tight">Describing the World</h2>
+            <p class="text-slate-600 font-medium max-w-2xl mx-auto text-lg leading-relaxed">
+                ¡El clima es visual y descriptivo! En este laboratorio aprenderás a detallar el clima utilizando la regla de oro: <b>El verbo To Be</b>, combinado con palabras intensificadoras (modifiers).
+            </p>
+        </header>
+
+        <section class="glass p-6 md:p-8 relative overflow-hidden border-t-4 border-t-sky-500">
+            <h3 class="text-2xl font-black text-slate-800 mb-2 uppercase tracking-wide"><i class="fas fa-layer-group text-sky-500 mr-2"></i> The Vocabulary Bank</h3>
+            <p class="text-slate-500 text-sm font-medium mb-6">Toca las tarjetas para ver su significado y un <b>ejemplo de uso</b> en inglés.</p>
+            
+            <div class="space-y-8">
+                <!-- Weather -->
+                <div>
+                    <h4 class="font-bold text-sky-700 border-b-2 border-sky-100 pb-2 mb-4 flex items-center gap-2"><i class="fas fa-cloud"></i> Weather & Seasons</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3" id="dict-weather">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Modifiers (NEW) -->
+                <div>
+                    <h4 class="font-bold text-emerald-700 border-b-2 border-emerald-100 pb-2 mb-4 flex items-center gap-2"><i class="fas fa-sort-amount-up"></i> Modifiers (Intensificadores)</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="dict-modifiers">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Grammar -->
+                <div>
+                    <h4 class="font-bold text-purple-700 border-b-2 border-purple-100 pb-2 mb-4 flex items-center gap-2"><i class="fas fa-spell-check"></i> Verb "To Be"</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="dict-grammar">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            <!-- Rule 1 -->
+            <section class="glass p-5 md:p-6 bg-white/50">
+                <h3 class="text-lg font-black text-slate-800 mb-3 flex items-center"><span class="rule-badge bg-sky-200 text-sky-800">1</span> El Pronombre "It"</h3>
+                <p class="text-slate-600 text-sm font-medium mb-4">En español decimos "está soleado". En inglés, una oración siempre necesita un sujeto. Usamos <b class="text-sky-600">"It"</b> para el clima.</p>
+                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="font-black text-lg text-slate-700 text-center mb-2">
+                        <span class="text-sky-600">It</span> + <span class="text-purple-600">is</span> + <span class="text-amber-500">sunny</span>
+                    </p>
+                    <p class="text-xs font-bold text-emerald-600 text-center"><i class="fas fa-check-circle"></i> Correcto: It is winter.</p>
+                    <p class="text-xs font-bold text-red-400 text-center line-through"><i class="fas fa-times-circle"></i> Is winter.</p>
+                </div>
+            </section>
+
+            <!-- Rule 2 -->
+            <section class="glass p-5 md:p-6 bg-white/50">
+                <h3 class="text-lg font-black text-slate-800 mb-3 flex items-center"><span class="rule-badge bg-sky-200 text-sky-800">2</span> Tu Temperatura</h3>
+                <p class="text-slate-600 text-sm font-medium mb-4">¡Cuidado! En inglés NO decimos "I have cold" (Tengo frío). Nosotros *somos* la temperatura usando el verbo <b class="text-purple-600">To Be</b>.</p>
+                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="font-black text-lg text-slate-700 text-center mb-2">
+                        <span class="text-sky-600">I</span> + <span class="text-purple-600">am</span> + <span class="text-blue-500">cold</span>
+                    </p>
+                    <p class="text-xs font-bold text-emerald-600 text-center"><i class="fas fa-check-circle"></i> Correcto: I am hot.</p>
+                    <p class="text-xs font-bold text-red-400 text-center line-through"><i class="fas fa-times-circle"></i> I have hot.</p>
+                </div>
+            </section>
+
+            <!-- Rule 3 (NEW) -->
+            <section class="glass p-5 md:p-6 bg-white/50">
+                <h3 class="text-lg font-black text-slate-800 mb-3 flex items-center"><span class="rule-badge bg-sky-200 text-sky-800">3</span> Usando Modifiers</h3>
+                <p class="text-slate-600 text-sm font-medium mb-4">Para hacer tu descripción más precisa, coloca un modificador (very, extremely, etc.) <b>después del verbo To Be</b>.</p>
+                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="font-black text-lg text-slate-700 text-center mb-2">
+                        <span class="text-purple-600">is</span> + <span class="text-emerald-500">very</span> + <span class="text-amber-500">sunny</span>
+                    </p>
+                    <p class="text-xs font-bold text-emerald-600 text-center"><i class="fas fa-check-circle"></i> Correcto: It is very hot.</p>
+                    <p class="text-xs font-bold text-red-400 text-center line-through"><i class="fas fa-times-circle"></i> It very is hot.</p>
+                </div>
+            </section>
+        </div>
+
+        <section class="glass p-6 md:p-8 bg-blue-50/30 border-t-4 border-t-blue-500">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-wide">Practice 1: Global Desk</h3>
+                <span class="text-xs font-bold bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full shadow-sm">75 PTS</span>
+            </div>
+            <p class="text-slate-600 mb-8 font-medium">Observa las ciudades del mundo. Completa las descripciones seleccionando la conjugación correcta del verbo <b class="text-purple-600">To Be</b>, los modificadores y el vocabulario visual adecuado.</p>
+            
+            <div class="space-y-10">
+                
+                <!-- City 1: Moscow -->
+                <div class="grid md:grid-cols-12 gap-6 items-center">
+                    <div class="md:col-span-5 city-screenshot bg-gradient-to-br from-blue-200 to-indigo-400 text-white">
+                        <div class="city-content">
+                            <div class="flex justify-between items-start w-full drop-shadow-md">
+                                <div>
+                                    <h4 class="font-black text-2xl">Moscow 🇷🇺</h4>
+                                    <p class="text-sm font-bold opacity-80 mt-1"><i class="fas fa-thermometer-empty"></i> -15°C</p>
+                                </div>
+                                <i class="fas fa-snowflake text-4xl animate-pulse"></i>
+                            </div>
+                            <div class="text-center mt-4 drop-shadow-lg">
+                                <span class="text-6xl">🥶</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-lg md:text-xl font-medium text-slate-700 leading-loose">
+                        "Look at Moscow! It 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'is', 5)">
+                            <option value="" disabled selected>verb</option>
+                            <option value="am">am</option>
+                            <option value="is">is</option>
+                        </select> 
+                        winter. The weather is completely 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'freezing', 5)">
+                            <option value="" disabled selected>vocab</option>
+                            <option value="sunny">sunny</option>
+                            <option value="freezing">freezing</option>
+                        </select>. 
+                        Look at that man, he 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'is', 5)">
+                            <option value="" disabled selected>verb</option>
+                            <option value="is">is</option>
+                            <option value="are">are</option>
+                        </select> 
+                        extremely cold!"
+                    </div>
+                </div>
+
+                <!-- City 2: Miami -->
+                <div class="grid md:grid-cols-12 gap-6 items-center">
+                    <div class="md:col-span-5 city-screenshot bg-gradient-to-br from-amber-300 to-orange-500 text-white">
+                        <div class="city-content">
+                            <div class="flex justify-between items-start w-full drop-shadow-md">
+                                <div>
+                                    <h4 class="font-black text-2xl">Miami 🇺🇸</h4>
+                                    <p class="text-sm font-bold opacity-80 mt-1"><i class="fas fa-thermometer-full"></i> 35°C</p>
+                                </div>
+                                <i class="fas fa-sun text-4xl animate-spin-slow"></i>
+                            </div>
+                            <div class="text-center mt-4 drop-shadow-lg">
+                                <span class="text-6xl">🥵</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-lg md:text-xl font-medium text-slate-700 leading-loose">
+                        "Welcome to Miami! It 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'is', 5)">
+                            <option value="" disabled selected>verb</option>
+                            <option value="is">is</option>
+                            <option value="are">are</option>
+                        </select> 
+                        summer. The sun is 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'very', 5)">
+                            <option value="" disabled selected>modifier</option>
+                            <option value="very">very</option>
+                            <option value="slightly">slightly</option>
+                        </select> 
+                        boiling today. We 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'are', 5)">
+                            <option value="" disabled selected>verb</option>
+                            <option value="am">am</option>
+                            <option value="are">are</option>
+                        </select> 
+                        so hot on the beach!"
+                    </div>
+                </div>
+
+                <!-- City 3: Tokyo -->
+                <div class="grid md:grid-cols-12 gap-6 items-center">
+                    <div class="md:col-span-5 city-screenshot bg-gradient-to-br from-pink-200 to-rose-400 text-white">
+                        <div class="city-content">
+                            <div class="flex justify-between items-start w-full drop-shadow-md">
+                                <div>
+                                    <h4 class="font-black text-2xl">Tokyo 🇯🇵</h4>
+                                    <p class="text-sm font-bold opacity-80 mt-1"><i class="fas fa-thermometer-half"></i> 18°C</p>
+                                </div>
+                                <i class="fas fa-wind text-4xl"></i>
+                            </div>
+                            <div class="text-center mt-4 drop-shadow-lg">
+                                <span class="text-6xl">🌸</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-lg md:text-xl font-medium text-slate-700 leading-loose">
+                        "This is Tokyo. It is spring right now. The pink flowers 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'are', 5)">
+                            <option value="" disabled selected>verb</option>
+                            <option value="is">is</option>
+                            <option value="are">are</option>
+                        </select> 
+                        beautiful! The weather 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'is', 5)">
+                            <option value="" disabled selected>verb</option>
+                            <option value="is">is</option>
+                            <option value="am">am</option>
+                        </select> 
+                        slightly 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'windy', 5)">
+                            <option value="" disabled selected>vocab</option>
+                            <option value="windy">windy</option>
+                            <option value="snowy">snowy</option>
+                        </select>."
+                    </div>
+                </div>
+
+                <!-- City 4: London -->
+                <div class="grid md:grid-cols-12 gap-6 items-center">
+                    <div class="md:col-span-5 city-screenshot bg-gradient-to-br from-slate-400 to-gray-600 text-white">
+                        <div class="city-content">
+                            <div class="flex justify-between items-start w-full drop-shadow-md">
+                                <div>
+                                    <h4 class="font-black text-2xl">London 🇬🇧</h4>
+                                    <p class="text-sm font-bold opacity-80 mt-1"><i class="fas fa-thermometer-quarter"></i> 8°C</p>
+                                </div>
+                                <i class="fas fa-cloud-showers-heavy text-4xl"></i>
+                            </div>
+                            <div class="text-center mt-4 drop-shadow-lg">
+                                <span class="text-6xl">☂️</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-lg md:text-xl font-medium text-slate-700 leading-loose">
+                        "Hello from London. The sky is completely gray. 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'It', 5)">
+                            <option value="" disabled selected>pronoun</option>
+                            <option value="It">It</option>
+                            <option value="He">He</option>
+                        </select> 
+                        is very rainy today. I 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'am', 5)">
+                            <option value="" disabled selected>verb</option>
+                            <option value="am">am</option>
+                            <option value="is">is</option>
+                        </select> 
+                        slightly 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'chilly', 5)">
+                            <option value="" disabled selected>vocab</option>
+                            <option value="chilly">chilly</option>
+                            <option value="boiling">boiling</option>
+                        </select>."
+                    </div>
+                </div>
+
+                <!-- City 5: Sydney -->
+                <div class="grid md:grid-cols-12 gap-6 items-center">
+                    <div class="md:col-span-5 city-screenshot bg-gradient-to-br from-sky-300 to-emerald-400 text-white">
+                        <div class="city-content">
+                            <div class="flex justify-between items-start w-full drop-shadow-md">
+                                <div>
+                                    <h4 class="font-black text-2xl">Sydney 🇦🇺</h4>
+                                    <p class="text-sm font-bold opacity-80 mt-1"><i class="fas fa-thermometer-half"></i> 25°C</p>
+                                </div>
+                                <i class="fas fa-sun text-4xl"></i>
+                            </div>
+                            <div class="text-center mt-4 drop-shadow-lg flex justify-center gap-2">
+                                <span class="text-5xl">☀️</span><span class="text-5xl">😎</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-lg md:text-xl font-medium text-slate-700 leading-loose">
+                        "Wow, Sydney! It 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'is', 5)">
+                            <option value="" disabled selected>verb</option>
+                            <option value="are">are</option>
+                            <option value="is">is</option>
+                        </select> 
+                        autumn, but it feels like summer. The beaches 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'are', 5)">
+                            <option value="" disabled selected>verb</option>
+                            <option value="are">are</option>
+                            <option value="is">is</option>
+                        </select> 
+                        extremely sunny. We 
+                        <select class="inline-select" onchange="Logic.checkInline(this, 'are', 5)">
+                            <option value="" disabled selected>verb</option>
+                            <option value="is">is</option>
+                            <option value="are">are</option>
+                        </select> 
+                        happy!"
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="glass p-6 md:p-8 bg-amber-50/30 border-t-4 border-t-amber-500">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-wide">Practice 2: Visual Scenarios</h3>
+                <span class="text-xs font-bold bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full shadow-sm">20 PTS</span>
+            </div>
+            <p class="text-slate-600 mb-6 font-medium">Observa los emojis y elige la frase correcta usando la regla del verbo To Be y los modificadores.</p>
+
+            <div class="grid sm:grid-cols-2 gap-6">
+                <!-- Q1 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
+                    <div class="text-6xl mb-4">🥶🌨️</div>
+                    <p class="font-bold text-slate-700 mb-4 text-sm">¿Cómo describimos este clima?</p>
+                    <div class="grid grid-cols-1 gap-2" id="q1">
+                        <button onclick="Logic.checkMC(this, 'q1', false, 5)" class="btn-press bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl">"It has completely freezing."</button>
+                        <button onclick="Logic.checkMC(this, 'q1', true, 5)" class="btn-press bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl">"It is completely freezing."</button>
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
+                    <div class="text-6xl mb-4">🥵☀️</div>
+                    <p class="font-bold text-slate-700 mb-4 text-sm">¿Cómo expresas tu temperatura aquí?</p>
+                    <div class="grid grid-cols-1 gap-2" id="q2">
+                        <button onclick="Logic.checkMC(this, 'q2', true, 5)" class="btn-press bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl">"I am extremely hot."</button>
+                        <button onclick="Logic.checkMC(this, 'q2', false, 5)" class="btn-press bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl">"I have extremely hot."</button>
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
+                    <div class="text-6xl mb-4">🍂💨</div>
+                    <p class="font-bold text-slate-700 mb-4 text-sm">¿Cómo está el clima en otoño?</p>
+                    <div class="grid grid-cols-1 gap-2" id="q3">
+                        <button onclick="Logic.checkMC(this, 'q3', true, 5)" class="btn-press bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl">"The weather is very windy."</button>
+                        <button onclick="Logic.checkMC(this, 'q3', false, 5)" class="btn-press bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl">"The weather are very windy."</button>
+                    </div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
+                    <div class="text-6xl mb-4">🌸🌿</div>
+                    <p class="font-bold text-slate-700 mb-4 text-sm">Describe las flores en primavera.</p>
+                    <div class="grid grid-cols-1 gap-2" id="q4">
+                        <button onclick="Logic.checkMC(this, 'q4', false, 5)" class="btn-press bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl">"The flowers is very beautiful."</button>
+                        <button onclick="Logic.checkMC(this, 'q4', true, 5)" class="btn-press bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl">"The flowers are very beautiful."</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass p-6 md:p-8 bg-emerald-50/30 border-t-4 border-t-emerald-500">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-wide">Practice 3: Sentence Halves</h3>
+                <span class="text-xs font-bold bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full shadow-sm">20 PTS</span>
+            </div>
+            <p class="text-slate-600 mb-6 font-medium">Conecta el inicio de la oración con el final correcto. Fíjate bien en el verbo To Be y el contexto.</p>
+            
+            <div class="space-y-4">
+                <!-- Half 1 -->
+                <div class="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="w-full md:w-1/2 font-bold text-slate-700 text-lg text-center md:text-left">
+                        1. "When it is summer, the weather..."
+                    </div>
+                    <div class="w-full md:w-1/2">
+                        <select class="block-select" onchange="Logic.checkHalves(this, 'is_hot', 5)">
+                            <option value="" disabled selected>Select the ending...</option>
+                            <option value="are_colorful">...are completely colorful.</option>
+                            <option value="is_hot">...is very hot and sunny.</option>
+                            <option value="am_cold">...am extremely cold.</option>
+                            <option value="is_rainy">...is completely rainy today.</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Half 2 -->
+                <div class="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="w-full md:w-1/2 font-bold text-slate-700 text-lg text-center md:text-left">
+                        2. "Look at the dark clouds, it..."
+                    </div>
+                    <div class="w-full md:w-1/2">
+                        <select class="block-select" onchange="Logic.checkHalves(this, 'is_rainy', 5)">
+                            <option value="" disabled selected>Select the ending...</option>
+                            <option value="is_hot">...is very hot and sunny.</option>
+                            <option value="is_rainy">...is completely rainy today.</option>
+                            <option value="are_colorful">...are completely colorful.</option>
+                            <option value="am_cold">...am extremely cold.</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Half 3 -->
+                <div class="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="w-full md:w-1/2 font-bold text-slate-700 text-lg text-center md:text-left">
+                        3. "In spring, the beautiful flowers..."
+                    </div>
+                    <div class="w-full md:w-1/2">
+                        <select class="block-select" onchange="Logic.checkHalves(this, 'are_colorful', 5)">
+                            <option value="" disabled selected>Select the ending...</option>
+                            <option value="am_cold">...am extremely cold.</option>
+                            <option value="are_colorful">...are completely colorful.</option>
+                            <option value="is_hot">...is very hot and sunny.</option>
+                            <option value="is_rainy">...is completely rainy today.</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Half 4 -->
+                <div class="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="w-full md:w-1/2 font-bold text-slate-700 text-lg text-center md:text-left">
+                        4. "I need a heavy coat because I..."
+                    </div>
+                    <div class="w-full md:w-1/2">
+                        <select class="block-select" onchange="Logic.checkHalves(this, 'am_cold', 5)">
+                            <option value="" disabled selected>Select the ending...</option>
+                            <option value="is_rainy">...is completely rainy today.</option>
+                            <option value="am_cold">...am extremely cold.</option>
+                            <option value="is_hot">...is very hot and sunny.</option>
+                            <option value="are_colorful">...are completely colorful.</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass p-6 md:p-8 bg-purple-50/30 border-t-4 border-t-purple-500">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-wide">Practice 4: Context Chat</h3>
+                <span class="text-xs font-bold bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full shadow-sm">20 PTS</span>
+            </div>
+            <p class="text-slate-600 mb-6 font-medium">Chatea con Mia. Asegúrate de usar el verbo To Be y los modificadores correctamente al responder sus mensajes.</p>
+            
+            <div class="max-w-md mx-auto">
+                <div id="chat-simulator-container" class="bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-white rounded-3xl p-4 h-[350px] md:h-[400px] flex flex-col gap-4 overflow-y-auto shadow-inner border border-slate-200 mb-4 custom-scrollbar">
+                    <div class="flex flex-col items-center justify-center h-full text-center">
+                        <div class="w-16 h-16 bg-purple-500 text-white rounded-full flex items-center justify-center text-3xl mb-4 shadow-md">👩🏻</div>
+                        <p class="font-bold text-slate-500 mb-4">¿Listo para platicar con Mia?</p>
+                        <button onclick="startChat()" class="btn-press bg-purple-600 text-white font-bold py-3 px-8 rounded-full shadow hover:bg-purple-700 transition">Iniciar Chat</button>
+                    </div>
+                </div>
+                <div id="chat-simulator-options" class="grid grid-cols-1 gap-2 min-h-[100px]"></div>
+            </div>
+        </section>
+
+        <!-- Final Button -->
+        <div class="text-center pt-8">
+            <button onclick="Logic.showResults()" class="btn-press bg-slate-900 hover:bg-black text-white font-black py-5 px-12 rounded-2xl shadow-xl text-xl uppercase tracking-widest border border-slate-700 w-full sm:w-auto">
+                <i class="fas fa-flag-checkered mr-2"></i> Evaluar Lab
+            </button>
+        </div>
+
+    </main>
+
+    <div id="results-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden justify-center items-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl flex flex-col items-center text-center p-10 transform scale-95 transition-transform duration-300" id="modal-content">
+            <div class="w-28 h-28 bg-gradient-to-tr from-indigo-100 to-indigo-200 text-indigo-600 rounded-full flex items-center justify-center text-6xl mb-6 shadow-inner border-4 border-white" id="icon-container">
+                <i class="fas fa-trophy" id="result-icon"></i>
+            </div>
+            <h2 class="text-4xl font-black text-slate-800 mb-2">Puntuación Final</h2>
+            <div class="text-6xl font-black text-indigo-600 mb-4"><span id="final-score-val">0</span><span class="text-3xl text-slate-400">/135</span></div>
+            <p class="text-slate-500 font-medium text-lg mb-8" id="result-message">¡Gran esfuerzo!</p>
+            <button onclick="location.reload()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 rounded-xl transition btn-press text-lg uppercase tracking-wide">
+                <i class="fas fa-redo mr-2"></i> Reintentar Lab
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Data arrays for dictionary
+        const dictionaryData = {
+            weather: [
+                { en: "Sunny", es: "Soleado", emoji: "☀️", ex: "It is sunny." },
+                { en: "Rainy", es: "Lluvioso", emoji: "🌧️", ex: "It is rainy today." },
+                { en: "Windy", es: "Ventoso", emoji: "💨", ex: "The city is windy." },
+                { en: "Freezing", es: "Helado", emoji: "🥶", ex: "It is freezing outside!" },
+                { en: "Boiling", es: "Muy Caluroso", emoji: "🥵", ex: "The sun is boiling." },
+                { en: "Spring", es: "Primavera", emoji: "🌸", ex: "The flowers are beautiful in spring." },
+                { en: "Summer", es: "Verano", emoji: "🏖️", ex: "Summer is very hot." },
+                { en: "Autumn", es: "Otoño", emoji: "🍂", ex: "Autumn is windy." },
+                { en: "Winter", es: "Invierno", emoji: "⛄", ex: "Winter is freezing." },
+                { en: "Chilly", es: "Fresco", emoji: "🌬️", ex: "I am a bit chilly." }
+            ],
+            grammar: [
+                { en: "I am", es: "Yo soy / estoy", emoji: "🙋🏻‍♂️", ex: "I am cold." },
+                { en: "It is", es: "Eso es / está", emoji: "☁️", ex: "It is sunny." },
+                { en: "They are", es: "Ellos son / están", emoji: "🌸", ex: "They are hot." }
+            ],
+            modifiers: [
+                { en: "Slightly", es: "Ligeramente", emoji: "🤏", ex: "It is slightly cold." },
+                { en: "Very", es: "Muy", emoji: "📈", ex: "I am very hot." },
+                { en: "Completely", es: "Completamente", emoji: "💯", ex: "The sky is completely gray." },
+                { en: "Extremely", es: "Extremadamente", emoji: "🔥", ex: "It is extremely freezing." }
+            ]
+        };
+
+        const TTS = {
+            speak(text) {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const cleanText = text.replace(/\\'/g, "'");
+                    const u = new SpeechSynthesisUtterance(cleanText);
+                    u.lang = 'en-US';
+                    u.rate = 0.9;
+                    window.speechSynthesis.speak(u);
+                }
+            }
+        };
+
+        // Render dictionary cards
+        function renderDictionary() {
+            const renderCategory = (data, containerId, backClass) => {
+                const container = document.getElementById(containerId);
+                let html = '';
+                data.forEach(item => {
+                    html += `
+                    <div class="flip-card" onclick="this.classList.toggle('flipped'); TTS.speak('${item.en.replace(/'/g, "\\'")}');">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <span class="text-4xl mb-2 drop-shadow-sm">${item.emoji}</span>
+                                <h4 class="font-bold text-slate-800 text-sm leading-tight">${item.en}</h4>
+                            </div>
+                            <div class="flip-card-back ${backClass}">
+                                <h4 class="font-bold text-sm mb-1">${item.es}</h4>
+                                <p class="text-[10px] italic opacity-90 leading-tight border-t border-white/30 pt-1 mt-1 w-full px-1">"${item.ex}"</p>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            };
+
+            renderCategory(dictionaryData.weather, 'dict-weather', 'weather-back');
+            renderCategory(dictionaryData.modifiers, 'dict-modifiers', 'modifier-back');
+            renderCategory(dictionaryData.grammar, 'dict-grammar', 'grammar-back');
+        }
+
+        const chatScript = [
+            { bot: "Hi! How is the weather in your city today?", options: ["It is completely sunny and hot.", "Is completely sunny and hot."], correct: 0 },
+            { bot: "Oh nice! Are you hot?", options: ["Yes, I have extremely hot.", "Yes, I am extremely hot."], correct: 1 },
+            { bot: "I am in Canada right now. Look at the sky!", options: ["Wow, it are completely snowy.", "Wow, it is completely snowy."], correct: 1 },
+            { bot: "Yes! And the temperature is -10°C.", options: ["You are very freezing!", "You have very freezing!"], correct: 0 }
+        ];
+        let chatStep = 0;
+
+        function startChat() {
+            chatStep = 0;
+            document.getElementById('chat-simulator-container').innerHTML = '';
+            showBotMessage(chatScript[chatStep].bot);
+        }
+
+        function showBotMessage(msg) {
+            const container = document.getElementById('chat-simulator-container');
+            const bubble = document.createElement('div');
+            bubble.className = "self-start bg-slate-50 p-3.5 rounded-2xl rounded-tl-sm shadow-sm max-w-[85%] text-slate-700 font-medium border border-slate-200 text-sm md:text-base";
+            bubble.innerText = msg;
+            container.appendChild(bubble);
+            container.scrollTop = container.scrollHeight;
+            
+            showChatOptions();
+            TTS.speak(msg.replace(/'/g, "\\'"));
+        }
+
+        function showChatOptions() {
+            const optionsContainer = document.getElementById('chat-simulator-options');
+            optionsContainer.innerHTML = '';
+            const script = chatScript[chatStep];
+            
+            script.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "bg-white hover:bg-purple-50 text-purple-700 font-bold p-3.5 rounded-2xl border-2 border-purple-200 transition text-left text-sm md:text-base shadow-sm hover:border-purple-400";
+                btn.innerText = opt;
+                btn.onclick = () => handleChatOption(index, script.correct, opt);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleChatOption(selectedIndex, correctIndex, text) {
+            if(selectedIndex === correctIndex) {
+                const container = document.getElementById('chat-simulator-container');
+                const bubble = document.createElement('div');
+                bubble.className = "self-end bg-purple-600 text-white p-3.5 rounded-2xl rounded-tr-sm shadow-sm max-w-[85%] font-medium text-sm md:text-base";
+                bubble.innerText = text;
+                container.appendChild(bubble);
+                container.scrollTop = container.scrollHeight;
+                
+                document.getElementById('chat-simulator-options').innerHTML = '';
+                Logic.addScore(5); // 4 questions * 5 pts = 20 pts
+                
+                chatStep++;
+                if(chatStep < chatScript.length) {
+                    setTimeout(() => {
+                        showBotMessage(chatScript[chatStep].bot);
+                    }, 800);
+                } else {
+                    setTimeout(() => {
+                        showBotMessage("I need to go buy a heavy coat. Bye!");
+                        setTimeout(() => {
+                            const endMsg = document.createElement('div');
+                            endMsg.className = "text-center text-slate-500 font-bold mt-4 bg-white py-2 px-4 rounded-full border shadow-sm self-center text-sm";
+                            endMsg.innerText = "¡Conversación completada! 🎉";
+                            container.appendChild(endMsg);
+                            container.scrollTop = container.scrollHeight;
+                        }, 800);
+                    }, 800);
+                }
+            } else {
+                const btn = document.getElementById('chat-simulator-options').children[selectedIndex];
+                btn.classList.add('bg-red-50', 'text-red-600', 'border-red-400');
+                btn.classList.remove('bg-white', 'text-purple-700', 'border-purple-200');
+                setTimeout(() => {
+                    btn.classList.remove('bg-red-50', 'text-red-600', 'border-red-400');
+                    btn.classList.add('bg-white', 'text-purple-700', 'border-purple-200');
+                }, 500);
+            }
+        }
+
+        const Logic = {
+            score: 0,
+            maxScore: 135, // Global Desk (15 * 5 = 75) + Scenarios (4 * 5 = 20) + Halves (4 * 5 = 20) + Chat (4 * 5 = 20)
+            
+            addScore(points) {
+                this.score += points;
+                if(this.score > this.maxScore) this.score = this.maxScore;
+                const display = document.getElementById('score-display');
+                const container = document.getElementById('score-container');
+                display.innerText = this.score;
+                
+                container.classList.add('score-bump');
+                setTimeout(() => container.classList.remove('score-bump'), 300);
+            },
+            
+            checkInline(element, correctAnswer, points) {
+                if(element.dataset.answered === 'true') return;
+                
+                if(element.value === correctAnswer) {
+                    element.classList.add('correct');
+                    element.dataset.answered = 'true';
+                    this.addScore(points);
+                    TTS.speak(correctAnswer);
+                } else {
+                    element.classList.add('incorrect');
+                    setTimeout(() => {
+                        element.classList.remove('incorrect');
+                        element.value = "";
+                    }, 500);
+                }
+            },
+
+            checkHalves(element, correctAnswer, points) {
+                if(element.dataset.answered === 'true') return;
+                
+                if(element.value === correctAnswer) {
+                    element.classList.add('correct');
+                    element.dataset.answered = 'true';
+                    this.addScore(points);
+                    const selectedText = element.options[element.selectedIndex].text;
+                    TTS.speak(selectedText.replace("...", ""));
+                } else {
+                    element.classList.add('incorrect');
+                    setTimeout(() => {
+                        element.classList.remove('incorrect');
+                        element.value = "";
+                    }, 500);
+                }
+            },
+
+            checkMC(button, groupId, isCorrect, points) {
+                const group = document.getElementById(groupId);
+                if(group.dataset.answered === 'true') return;
+
+                const buttons = group.querySelectorAll('button');
+                
+                if(isCorrect) {
+                    button.className = button.className.replace('bg-slate-50', 'bg-emerald-50').replace('border-slate-200', 'border-emerald-500').replace('text-slate-600', 'text-emerald-800');
+                    group.dataset.answered = 'true';
+                    this.addScore(points);
+                    buttons.forEach(b => { if(b !== button) b.classList.add('opacity-40', 'pointer-events-none'); });
+                    TTS.speak(button.innerText.replace(/"/g, ''));
+                } else {
+                    const originalClass = button.className;
+                    button.className = button.className.replace('bg-slate-50', 'bg-red-50').replace('border-slate-200', 'border-red-400').replace('text-slate-600', 'text-red-800');
+                    setTimeout(() => {
+                        button.className = originalClass;
+                    }, 800);
+                }
+            },
+
+            showResults() {
+                const modal = document.getElementById('results-modal');
+                const content = document.getElementById('modal-content');
+                const finalScore = document.getElementById('final-score-val');
+                const msg = document.getElementById('result-message');
+                const icon = document.getElementById('result-icon');
+                const iconCont = document.getElementById('icon-container');
+                
+                finalScore.innerText = this.score;
+                
+                if(this.score >= 120) {
+                    msg.innerHTML = "<b class='text-emerald-600'>¡Excelente trabajo!</b> Dominas el verbo To Be a la perfección.";
+                    icon.className = "fas fa-crown";
+                    iconCont.className = "w-28 h-28 bg-gradient-to-tr from-yellow-300 to-yellow-500 text-white rounded-full flex items-center justify-center text-6xl mb-6 shadow-xl border-4 border-white";
+                } else if(this.score >= 90) {
+                    msg.innerHTML = "<b class='text-sky-600'>¡Buen trabajo!</b> Tienes un buen entendimiento de la gramática.";
+                    icon.className = "fas fa-medal";
+                } else {
+                    msg.innerHTML = "Sigue practicando. Repasa las reglas gramaticales e inténtalo de nuevo.";
+                    icon.className = "fas fa-book-reader";
+                }
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                setTimeout(() => content.classList.remove('scale-95'), 10);
+            }
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDictionary();
+        });
+
+    </script>
+</body>
+</html>
