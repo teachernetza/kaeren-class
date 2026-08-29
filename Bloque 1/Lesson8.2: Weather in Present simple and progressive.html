@@ -3,215 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Weather & Grammar Master Lab</title>
-    <!-- Tailwind CSS for robust, utility-first styling -->
+    <title>Weather & Grammar Self-Practice Lab</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        /* 
-         * ==========================================
-         * CUSTOM CSS & ANIMATIONS
-         * ==========================================
-         */
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
         
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Nunito', sans-serif; background-color: #f8fafc; color: #1e293b; -webkit-tap-highlight-color: transparent; }
 
-        body { 
-            font-family: 'Nunito', sans-serif; 
-            background-color: #f8fafc; /* Very soft slate */
-            color: #1e293b; 
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Solid UI Design for High Contrast */
         .solid-card {
             background-color: #ffffff;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             border-radius: 1.25rem;
             overflow: hidden;
-            transition: box-shadow 0.3s ease;
-        }
-        .solid-card:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
         }
 
-        /* Navigation Links */
-        .nav-link {
-            font-weight: 800; color: #64748b; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: all 0.2s;
-        }
-        .nav-link:hover {
-            background: #f1f5f9; color: #0284c7;
-        }
+        .nav-link { font-weight: 800; color: #64748b; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: all 0.2s; }
+        .nav-link:hover { background: #f1f5f9; color: #0284c7; }
 
-        /* Option Buttons */
         .opt-btn {
-            width: 100%;
-            text-align: left;
-            padding: 1rem 1.25rem;
-            border-radius: 0.75rem;
-            font-weight: 700;
-            color: #334155;
-            background-color: #f8fafc;
-            border: 2px solid #e2e8f0;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            position: relative;
+            width: 100%; text-align: left; padding: 1rem 1.25rem; border-radius: 0.75rem;
+            font-weight: 700; color: #334155; background-color: #f8fafc; border: 2px solid #e2e8f0;
+            transition: all 0.2s ease; cursor: pointer;
         }
-        .opt-btn:hover:not(:disabled) { 
-            border-color: #cbd5e1; 
-            background-color: #ffffff; 
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        }
-        .opt-btn:active:not(:disabled) { 
-            transform: translateY(0); 
-        }
-        
-        .opt-btn.correct { 
-            background-color: #ecfdf5; 
-            border-color: #10b981; 
-            color: #047857; 
-            pointer-events: none; 
-        }
-        .opt-btn.incorrect { 
-            background-color: #fef2f2; 
-            border-color: #ef4444; 
-            color: #b91c1c; 
-            opacity: 0.6; 
-            pointer-events: none; 
-        }
-        .opt-btn:disabled { 
-            cursor: not-allowed; 
-        }
+        .opt-btn:hover:not(:disabled) { border-color: #cbd5e1; background-color: #ffffff; transform: translateY(-2px); }
+        .opt-btn.correct { background-color: #ecfdf5; border-color: #10b981; color: #047857; pointer-events: none; }
+        .opt-btn.incorrect { background-color: #fef2f2; border-color: #ef4444; color: #b91c1c; opacity: 0.6; pointer-events: none; }
+        .opt-btn:disabled { cursor: not-allowed; }
 
-        /* Feedback Box Animations */
-        .feedback-box {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
-            opacity: 0;
-            margin-top: 0;
-        }
-        .feedback-box.show {
-            max-height: 800px;
-            opacity: 1;
-            margin-top: 1rem;
-        }
+        .feedback-box { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s ease; opacity: 0; }
+        .feedback-box.show { max-height: 500px; opacity: 1; margin-top: 1rem; }
 
-        /* Image Cards */
-        .vocab-img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-bottom: 2px solid #e2e8f0;
-        }
+        .vocab-img { width: 100%; height: 180px; object-fit: cover; border-bottom: 2px solid #e2e8f0; }
 
-        /* Header Pinned */
-        .sticky-header {
-            position: sticky; top: 0; z-index: 50;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        /* Score & Progress Elements */
-        .score-pill {
-            background: linear-gradient(135deg, #0284c7, #2563eb);
-            color: white; padding: 0.5rem 1.25rem; border-radius: 9999px; font-weight: 900;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .score-bump { transform: scale(1.15); }
+        .sticky-header { position: sticky; top: 0; z-index: 50; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 2px solid #e2e8f0; }
+        .score-pill { background: linear-gradient(135deg, #0284c7, #2563eb); color: white; padding: 0.5rem 1.25rem; border-radius: 9999px; font-weight: 900; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        .score-bump { transform: scale(1.15); transition: transform 0.2s; }
         
         .progress-bar-container { height: 6px; width: 100%; background-color: #e2e8f0; }
         .progress-bar-fill { height: 100%; background-color: #0ea5e9; width: 0%; transition: width 0.4s ease; }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f8fafc; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
         .svg-icon { width: 1.5rem; height: 1.5rem; display: inline-block; vertical-align: middle; }
     </style>
 </head>
 <body class="pb-24">
 
-    <!-- ==========================================
-         SVG ICONS LIBRARY (Inline for robustness)
-    =========================================== -->
-    <svg style="display: none;">
-        <symbol id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </symbol>
-        <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-        </symbol>
-        <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </symbol>
-        <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="15" y1="9" x2="9" y2="15"></line>
-            <line x1="9" y1="9" x2="15" y2="15"></line>
-        </symbol>
-        <symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-        </symbol>
-        <symbol id="icon-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-        </symbol>
-        <symbol id="icon-mix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="21" y1="16" x2="16" y2="21"></line>
-            <line x1="21" y1="16" x2="16" y2="11"></line>
-            <line x1="3" y1="8" x2="21" y2="16"></line>
-            <line x1="21" y1="8" x2="16" y2="3"></line>
-            <line x1="21" y1="8" x2="16" y2="13"></line>
-            <line x1="3" y1="16" x2="21" y2="8"></line>
-        </symbol>
-    </svg>
-
-    <!-- ==========================================
-         HEADER & NAVIGATION
-    =========================================== -->
+    <!-- HEADER -->
     <header class="sticky-header shadow-sm">
         <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center text-white shadow-md">
-                    <svg class="svg-icon"><use href="#icon-sun"></use></svg>
+                    <i class="fas fa-cloud-sun"></i>
                 </div>
                 <div>
                     <h1 class="font-black text-slate-800 leading-tight text-lg">WeatherLab</h1>
-                    <p class="text-[10px] font-black text-sky-600 uppercase tracking-widest">Self-Study Guide</p>
+                    <p class="text-[10px] font-black text-sky-600 uppercase tracking-widest">Autoestudio</p>
                 </div>
             </div>
             
             <div class="hidden md:flex gap-1 overflow-x-auto text-sm mr-4">
-                <a href="#theory" class="nav-link">Theory</a>
+                <a href="#theory" class="nav-link">Teoría</a>
                 <a href="#ex1" class="nav-link">1. Vocab</a>
                 <a href="#ex2" class="nav-link">2. Simple</a>
                 <a href="#ex3" class="nav-link">3. Prog</a>
-                <a href="#ex4" class="nav-link">4. Feelings</a>
-                <a href="#ex5" class="nav-link">5. Mixed</a>
+                <a href="#ex4" class="nav-link">4. Sentimientos</a>
+                <a href="#ex5" class="nav-link">5. Mixto</a>
             </div>
 
             <div class="flex items-center gap-4">
-                <div class="text-xs font-bold text-slate-500 hidden sm:block">Progress: <span id="progress-text" class="text-sky-600 font-black">0/25</span></div>
+                <div class="text-xs font-bold text-slate-500 hidden sm:block">Progreso: <span id="progress-text" class="text-sky-600 font-black">0/25</span></div>
                 <div class="score-pill flex items-center gap-2" id="score-container">
                     <span id="score-display">0</span> <span class="text-sky-200 text-xs font-bold">/ 200</span>
                 </div>
@@ -224,180 +87,117 @@
 
     <main class="max-w-4xl mx-auto px-4 pt-10 space-y-12">
 
-        <!-- Intro -->
+        <!-- INTRO -->
         <div class="text-center py-6">
-            <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">Weather & States</h2>
+            <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">El Clima y los Tiempos</h2>
             <p class="text-slate-600 font-semibold text-lg max-w-2xl mx-auto leading-relaxed">
-                Welcome to your self-practice lab. Learn to perfectly describe the weather, the seasons, and your feelings using the <b>Present Simple</b> and the <b>Present Progressive</b>. Complete 25 detailed exercises to master the topic.
+                Aprende a describir el clima general y lo que sucede en este instante. Desplázate hacia abajo para completar los 5 ejercicios explicados paso a paso en español.
             </p>
         </div>
 
         <!-- ==============================================
-             THEORY & REFERENCE GUIDE
+             TEORÍA BÁSICA EN ESPAÑOL
         =============================================== -->
         <section id="theory" class="scroll-mt-24">
-            <h2 class="text-2xl font-black text-slate-800 mb-4 uppercase tracking-wide">📚 Grammar Reference Guide</h2>
+            <h2 class="text-2xl font-black text-slate-800 mb-4 uppercase tracking-wide">📖 Guía Rápida de Gramática</h2>
             <div class="grid md:grid-cols-2 gap-6">
                 
-                <!-- Present Simple Theory -->
-                <div class="solid-card overflow-hidden">
-                    <div class="bg-blue-50 border-b border-blue-100 p-5">
-                        <h3 class="font-black text-blue-800 text-lg"><i class="fas fa-calendar-alt mr-2 text-blue-600"></i> Present Simple</h3>
-                    </div>
-                    <div class="p-5 text-sm space-y-4 text-slate-700 font-medium">
-                        <p><b>Use:</b> To talk about general facts, routines, and what normally happens in a season or place.</p>
-                        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
-                            <p class="font-bold text-blue-700 mb-1">Structure:</p>
-                            <p><b>(+)</b> It + Verb(s)<br>
-                               <b>(-)</b> It + doesn't + Verb<br>
-                               <b>(?)</b> Does + it + Verb?</p>
-                        </div>
-                        <p><b>Time Markers:</b> usually, normally, every day, in winter, often.</p>
-                        <div class="p-3 bg-slate-50 border-l-4 border-blue-500 rounded-r-lg">
-                            <p class="italic">"It usually <b>rains</b> heavily in Nayarit during July."</p>
-                        </div>
+                <!-- Present Simple -->
+                <div class="solid-card p-6 border-t-4 border-t-blue-500">
+                    <h3 class="font-black text-blue-700 text-lg mb-2"><i class="fas fa-calendar-alt mr-2"></i> Presente Simple (Rutinas y Clima General)</h3>
+                    <p class="text-sm text-slate-700 font-medium mb-3">Se usa para hablar de hechos generales o lo que pasa normalmente en ciertas estaciones.</p>
+                    <div class="bg-blue-50 p-3 rounded-lg text-sm text-blue-900 space-y-1">
+                        <p><b>Regla para "It":</b> Al verbo se le agrega <b>-s</b> o <b>-es</b>.</p>
+                        <p><i>Ejemplo:</i> "It rain<b>s</b> a lot in summer."</p>
+                        <p><b>Palabras clave:</b> usually (usualmente), normally, every day (todos los días).</p>
                     </div>
                 </div>
 
-                <!-- Present Progressive Theory -->
-                <div class="solid-card overflow-hidden">
-                    <div class="bg-emerald-50 border-b border-emerald-100 p-5">
-                        <h3 class="font-black text-emerald-800 text-lg"><i class="fas fa-clock mr-2 text-emerald-600"></i> Present Progressive</h3>
-                    </div>
-                    <div class="p-5 text-sm space-y-4 text-slate-700 font-medium">
-                        <p><b>Use:</b> To talk about actions happening <i>right now</i>, at this exact moment. It is a temporary action.</p>
-                        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
-                            <p class="font-bold text-emerald-700 mb-1">Structure:</p>
-                            <p><b>(+)</b> It + is + Verb(ing)<br>
-                               <b>(-)</b> It + isn't + Verb(ing)<br>
-                               <b>(?)</b> Is + it + Verb(ing)?</p>
-                        </div>
-                        <p><b>Time Markers:</b> now, right now, at the moment, look!, listen!</p>
-                        <div class="p-3 bg-slate-50 border-l-4 border-emerald-500 rounded-r-lg">
-                            <p class="italic">"Look! It <b>is raining</b> right now. Grab an umbrella."</p>
-                        </div>
+                <!-- Present Progressive -->
+                <div class="solid-card p-6 border-t-4 border-t-emerald-500">
+                    <h3 class="font-black text-emerald-700 text-lg mb-2"><i class="fas fa-clock mr-2"></i> Presente Progresivo (Pasando Ahora)</h3>
+                    <p class="text-sm text-slate-700 font-medium mb-3">Se usa para describir exactamente lo que el clima está haciendo en este preciso momento.</p>
+                    <div class="bg-emerald-50 p-3 rounded-lg text-sm text-emerald-900 space-y-1">
+                        <p><b>Estructura:</b> is / are + verbo con <b>-ing</b>.</p>
+                        <p><i>Ejemplo:</i> "Look! It <b>is raining</b> right now."</p>
+                        <p><b>Palabras clave:</b> now (ahora), right now, look! (¡mira!).</p>
                     </div>
                 </div>
 
-                <!-- Stative Verbs Theory (Full Width) -->
-                <div class="solid-card overflow-hidden md:col-span-2">
-                    <div class="bg-amber-50 border-b border-amber-100 p-5">
-                        <h3 class="font-black text-amber-800 text-lg"><i class="fas fa-heart mr-2 text-amber-600"></i> Stative Verbs (Feelings & States)</h3>
-                    </div>
-                    <div class="p-5 text-sm space-y-4 text-slate-700 font-medium">
-                        <p>Some verbs express a <b>state, feeling, or possession</b> rather than a physical action. Even if you are feeling it "right now", we usually do NOT use the <i>-ing</i> form. We use the <b>Present Simple</b>.</p>
-                        
-                        <div class="grid sm:grid-cols-3 gap-4">
-                            <div class="bg-white p-3 border border-slate-200 rounded-lg shadow-sm">
-                                <p class="font-bold text-amber-700 border-b border-slate-100 pb-1 mb-2">Thoughts</p>
-                                <ul class="list-disc list-inside"><li>Know</li><li>Believe</li><li>Understand</li></ul>
-                            </div>
-                            <div class="bg-white p-3 border border-slate-200 rounded-lg shadow-sm">
-                                <p class="font-bold text-amber-700 border-b border-slate-100 pb-1 mb-2">Feelings</p>
-                                <ul class="list-disc list-inside"><li>Love / Hate</li><li>Want / Need</li><li>Prefer</li></ul>
-                            </div>
-                            <div class="bg-white p-3 border border-slate-200 rounded-lg shadow-sm">
-                                <p class="font-bold text-amber-700 border-b border-slate-100 pb-1 mb-2">Senses & States</p>
-                                <ul class="list-disc list-inside"><li>Feel</li><li>Seem</li><li>Cost</li></ul>
-                            </div>
-                        </div>
-                        <div class="p-3 bg-rose-50 border-l-4 border-rose-500 rounded-r-lg flex flex-col sm:flex-row gap-4">
-                            <div class="flex-1">
-                                <p class="text-rose-700 font-bold"><i class="fas fa-times-circle"></i> Incorrect:</p>
-                                <p class="italic">"I am wanting a hot coffee."</p>
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-emerald-700 font-bold"><i class="fas fa-check-circle"></i> Correct:</p>
-                                <p class="italic">"I <b>want</b> a hot coffee."</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
 
         <!-- ==============================================
-             EXERCISE 1: VOCABULARY
+             EXERCISE 1: VOCABULARIO GENERAL
         =============================================== -->
         <section id="ex1" class="scroll-mt-24">
             <div class="solid-card border-t-8 border-t-blue-500">
                 <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
-                    <h3 class="text-2xl font-black text-slate-800"><svg class="svg-icon text-blue-500 mr-2"><use href="#icon-book"></use></svg> Ex 1: Weather Vocabulary</h3>
+                    <h3 class="text-2xl font-black text-slate-800"><i class="fas fa-image text-blue-500 mr-2"></i> Ejercicio 1: Vocabulario del Clima</h3>
                     <span class="text-sm font-black bg-blue-100 text-blue-700 px-3 py-1 rounded-full">40 PTS</span>
                 </div>
                 
                 <div class="p-6 space-y-8 bg-slate-50">
-                    
-                    <!-- Question 1 -->
+                    <!-- Q1 -->
                     <div class="solid-card bg-white" id="q1">
-                        <img src="https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=800&q=80" alt="Rainy" class="vocab-img">
+                        <img src="https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=800&q=80" alt="Lluvia" class="vocab-img">
                         <div class="p-6">
-                            <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">1.</span> Water is falling from the sky. What is the weather doing?</p>
+                            <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">1.</span> ¿Cómo se describe cuando cae agua del cielo?</p>
                             <div class="grid sm:grid-cols-2 gap-3" id="opts-1">
-                                <button class="opt-btn" onclick="Logic.handleAnswer(1, this, false, 'Es incorrecto. Sunny significa soleado.')">A) It is sunny.</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(1, this, true, '¡Correcto! Rain significa lluvia, y raining describe que está lloviendo en este momento.')">B) It is raining.</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(1, this, false, 'Incorrecto. Snowy significa nevado.')">C) It is snowy.</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(1, this, false, 'Incorrecto. Windy significa ventoso.')">D) It is windy.</button>
+                                <button class="opt-btn" onclick="Logic.handleAnswer(1, this, false, 'Incorrecto. Sunny significa soleado.')">A) It is sunny (Soleado)</button>
+                                <button class="opt-btn" onclick="Logic.handleAnswer(1, this, true, '¡Correcto! Raining significa que está lloviendo.')">B) It is raining (Lluvioso)</button>
                             </div>
                             <div id="feed-1" class="feedback-box"></div>
                         </div>
                     </div>
 
-                    <!-- Question 2 -->
+                    <!-- Q2 -->
                     <div class="solid-card bg-white" id="q2">
-                        <img src="https://images.unsplash.com/photo-1601297183305-6df142704ea2?auto=format&fit=crop&w=800&q=80" alt="Sunny" class="vocab-img">
+                        <img src="https://images.unsplash.com/photo-1601297183305-6df142704ea2?w=800&q=80" alt="Sol" class="vocab-img">
                         <div class="p-6">
-                            <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">2.</span> It is a beautiful day to ride a Kent Roadtech bike. The sky is clear. It is a _______ day.</p>
+                            <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">2.</span> El cielo está despejado y brilla el sol. ¿Cómo está el día?</p>
                             <div class="grid sm:grid-cols-2 gap-3" id="opts-2">
-                                <button class="opt-btn" onclick="Logic.handleAnswer(2, this, false, 'Incorrecto. Cloudy significa nublado.')">A) Cloudy</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(2, this, false, 'Incorrecto. Stormy significa tormentoso.')">B) Stormy</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(2, this, true, '¡Excelente! Sunny significa soleado. Perfecto para andar en bicicleta.')">C) Sunny</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(2, this, false, 'Incorrecto. Foggy significa con niebla.')">D) Foggy</button>
+                                <button class="opt-btn" onclick="Logic.handleAnswer(2, this, true, '¡Correcto! Sunny significa soleado.')">A) Sunny (Soleado)</button>
+                                <button class="opt-btn" onclick="Logic.handleAnswer(2, this, false, 'Incorrecto. Snowy significa nevado.')">B) Snowy (Nevado)</button>
                             </div>
                             <div id="feed-2" class="feedback-box"></div>
                         </div>
                     </div>
 
-                    <!-- Question 3 -->
+                    <!-- Q3 -->
                     <div class="solid-card bg-white" id="q3">
-                        <img src="https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=800&q=80" alt="Windy" class="vocab-img">
+                        <img src="https://images.unsplash.com/photo-1527482797697-8795b05a13fe?w=800&q=80" alt="Viento" class="vocab-img">
                         <div class="p-6">
-                            <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">3.</span> Look at the trees! They are moving a lot. It is very _______.</p>
+                            <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">3.</span> Las ramas de los árboles se mueven mucho por el aire fuerte. Está...</p>
                             <div class="grid sm:grid-cols-2 gap-3" id="opts-3">
-                                <button class="opt-btn" onclick="Logic.handleAnswer(3, this, true, '¡Correcto! Windy significa ventoso o que hace mucho viento.')">A) Windy</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(3, this, false, 'Incorrecto. Freezing significa helado.')">B) Freezing</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(3, this, false, 'Incorrecto. Hot significa caluroso.')">C) Hot</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(3, this, false, 'Incorrecto. Snowing significa nevando.')">D) Snowing</button>
+                                <button class="opt-btn" onclick="Logic.handleAnswer(3, this, true, '¡Correcto! Windy significa ventoso.')">A) Windy (Ventoso)</button>
+                                <button class="opt-btn" onclick="Logic.handleAnswer(3, this, false, 'Incorrecto. Foggy significa con neblina.')">B) Foggy (Neblinoso)</button>
                             </div>
                             <div id="feed-3" class="feedback-box"></div>
                         </div>
                     </div>
 
-                    <!-- Question 4 -->
+                    <!-- Q4 -->
                     <div class="solid-card bg-white" id="q4">
-                        <img src="https://images.unsplash.com/photo-1534088568595-a066f410bcda?auto=format&fit=crop&w=800&q=80" alt="Cloudy" class="vocab-img">
+                        <img src="https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=800&q=80" alt="Nubes" class="vocab-img">
                         <div class="p-6">
-                            <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">4.</span> You can't see the sun today because the sky is covered. It is _______.</p>
+                            <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">4.</span> El cielo está lleno de nubes grises y no se ve el sol. Está...</p>
                             <div class="grid sm:grid-cols-2 gap-3" id="opts-4">
-                                <button class="opt-btn" onclick="Logic.handleAnswer(4, this, false, 'Incorrecto. Clear significa despejado.')">A) Clear</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(4, this, true, '¡Correcto! Cloudy significa nublado (lleno de nubes).')">B) Cloudy</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(4, this, false, 'Incorrecto. Sunny significa soleado.')">C) Sunny</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(4, this, false, 'Incorrecto. Warm significa cálido.')">D) Warm</button>
+                                <button class="opt-btn" onclick="Logic.handleAnswer(4, this, false, 'Incorrecto. Clear es despejado.')">B) Clear (Despejado)</button>
+                                <button class="opt-btn" onclick="Logic.handleAnswer(4, this, true, '¡Correcto! Cloudy significa nublado.')">A) Cloudy (Nublado)</button>
                             </div>
                             <div id="feed-4" class="feedback-box"></div>
                         </div>
                     </div>
 
-                    <!-- Question 5 -->
+                    <!-- Q5 -->
                     <div class="solid-card bg-white" id="q5">
-                        <img src="https://images.unsplash.com/photo-1478719059408-592965723cbc?auto=format&fit=crop&w=800&q=80" alt="Winter" class="vocab-img">
+                        <img src="https://images.unsplash.com/photo-1478719059408-592965723cbc?w=800&q=80" alt="Invierno" class="vocab-img">
                         <div class="p-6">
-                            <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">5.</span> It is December, it is very cold, and there is snow. The season is _______.</p>
+                            <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">5.</span> ¿Cómo se llama la estación más fría del año donde suele nevar?</p>
                             <div class="grid sm:grid-cols-2 gap-3" id="opts-5">
-                                <button class="opt-btn" onclick="Logic.handleAnswer(5, this, false, 'Incorrecto. Summer es verano.')">A) Summer</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(5, this, false, 'Incorrecto. Spring es primavera.')">B) Spring</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(5, this, false, 'Incorrecto. Autumn es otoño.')">C) Autumn</button>
-                                <button class="opt-btn" onclick="Logic.handleAnswer(5, this, true, '¡Correcto! Winter es invierno, la estación más fría.')">D) Winter</button>
+                                <button class="opt-btn" onclick="Logic.handleAnswer(5, this, false, 'Incorrecto. Summer es verano.')">A) Summer (Verano)</button>
+                                <button class="opt-btn" onclick="Logic.handleAnswer(5, this, true, '¡Correcto! Winter es invierno.')">B) Winter (Invierno)</button>
                             </div>
                             <div id="feed-5" class="feedback-box"></div>
                         </div>
@@ -412,68 +212,59 @@
         <section id="ex2" class="scroll-mt-24">
             <div class="solid-card border-t-8 border-t-emerald-500">
                 <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
-                    <h3 class="text-2xl font-black text-slate-800"><i class="fas fa-calendar-alt text-emerald-500 mr-2"></i> Ex 2: Present Simple (Facts)</h3>
+                    <h3 class="text-2xl font-black text-slate-800"><i class="fas fa-calendar-alt text-emerald-500 mr-2"></i> Ejercicio 2: Presente Simple (Hechos y Clima General)</h3>
                     <span class="text-sm font-black bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">40 PTS</span>
                 </div>
                 
-                <div class="p-6 space-y-8 bg-slate-50">
+                <div class="p-6 space-y-6 bg-slate-50">
+                    <p class="text-sm text-slate-600 font-medium"><b>Explicación:</b> Elige la opción correcta para completar oraciones sobre el clima general o rutinas.</p>
                     
-                    <!-- Question 6 -->
+                    <!-- Q6 -->
                     <div class="solid-card bg-white p-6" id="q6">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">6.</span> In Nayarit, it usually _______ a lot during August.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">6.</span> In summer, it _______ very hot in many cities.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-6">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(6, this, false, 'Incorrecto. Recuerda que para it debemos agregar una s al final del verbo en Present Simple.')">A) rain</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(6, this, false, 'Incorrecto. Is raining se usa para algo que pasa en este preciso momento, no para rutinas (usually).')">B) is raining</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(6, this, true, '¡Correcto! Usamos Present Simple para rutinas (usually). Como el sujeto es It, el verbo lleva -s: rains.')">C) rains</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(6, this, false, 'Incorrecto. Are raining es gramaticalmente incorrecto para it.')">D) are raining</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(6, this, false, 'Incorrecto. Al hablar de un hecho general con el sujeto It, el verbo lleva -s.')">A) be</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(6, this, true, '¡Correcto! Usamos is (del verbo to be) como hecho general en Presente Simple para el clima.')">B) is</button>
                         </div>
                         <div id="feed-6" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 7 -->
+                    <!-- Q7 -->
                     <div class="solid-card bg-white p-6" id="q7">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">7.</span> I normally _______ the Jetta to work at One English when the weather is bad.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">7.</span> It usually _______ a lot during the rainy season.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-7">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(7, this, true, '¡Excelente! Normalmente (normally) indica una rutina. Para el sujeto I, el verbo se queda en su forma base: take.')">A) take</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(7, this, false, 'Incorrecto. Takes solo se usa para he, she, it.')">B) takes</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(7, this, false, 'Incorrecto. Am taking es Present Progressive, usado para el momento actual, no para rutinas.')">C) am taking</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(7, this, false, 'Incorrecto. Taking no puede ir solo sin el verbo to be.')">D) taking</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(7, this, true, '¡Correcto! Usamos rains porque indica una rutina o hecho estacional (usually) y el sujeto es It.')">A) rains</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(7, this, false, 'Incorrecto. Rain no lleva la -s requerida para la tercera persona (It).')">B) rain</button>
                         </div>
                         <div id="feed-7" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 8 -->
+                    <!-- Q8 -->
                     <div class="solid-card bg-white p-6" id="q8">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">8.</span> How often _______ in your city?</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">8.</span> It rarely _______ in the desert.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-8">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(8, this, false, 'Incorrecto. Para it el auxiliar debe ser does, no do.')">A) do it snow</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(8, this, true, '¡Correcto! En preguntas de rutina en Present Simple, usamos el auxiliar Does para el sujeto it. El verbo queda en forma base: Does it snow.')">B) does it snow</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(8, this, false, 'Incorrecto. Is it snowing pregunta por lo que está pasando ahorita mismo, pero How often pregunta por una rutina.')">C) is it snowing</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(8, this, false, 'Incorrecto. Does it snows es incorrecto porque la s ya está en el auxiliar does, no se repite en el verbo.')">D) does it snows</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(8, this, true, '¡Correcto! Snows es correcto para el Presente Simple afirmativo con el sujeto It.')">A) snows</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(8, this, false, 'Incorrecto. Snow le falta la -s.')">B) snow</button>
                         </div>
                         <div id="feed-8" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 9 -->
+                    <!-- Q9 -->
                     <div class="solid-card bg-white p-6" id="q9">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">9.</span> Cats generally _______ the rain. They prefer to stay inside.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">9.</span> _______ it snow in your city during winter?</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-9">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(9, this, false, 'Incorrecto. Hates lleva s, pero el sujeto Cats es plural (they), por lo que el verbo va normal.')">A) hates</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(9, this, false, 'Incorrecto. Hate es un verbo estático (sentimiento), raramente se usa en progresivo.')">B) are hating</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(9, this, false, 'Incorrecto. Is hating es incorrecto tanto por ser progresivo como por usar is para un sujeto plural.')">C) is hating</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(9, this, true, '¡Correcto! Cats es plural (they), así que el verbo en Present Simple va en su forma original: hate.')">D) hate</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(9, this, false, 'Incorrecto. Para el sujeto It en preguntas usamos Does, no Do.')">A) Do</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(9, this, true, '¡Correcto! Usamos Does para formular preguntas en Presente Simple con el sujeto It.')">B) Does</button>
                         </div>
                         <div id="feed-9" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 10 -->
+                    <!-- Q10 -->
                     <div class="solid-card bg-white p-6" id="q10">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">10.</span> Diego _______ every day, even when the weather is foggy.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">10.</span> The sun always _______ in the east.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-10">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(10, this, false, 'Incorrecto. Cycle le falta la s, ya que el sujeto Diego equivale a He.')">A) cycle</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(10, this, false, 'Incorrecto. Is cycling se usa para el momento actual, pero la oración dice every day (rutina).')">B) is cycling</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(10, this, true, '¡Correcto! Every day indica rutina. Como Diego es he, agregamos la s al verbo: cycles.')">C) cycles</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(10, this, false, 'Incorrecto. Are cycling usa el auxiliar incorrecto para he.')">D) are cycling</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(10, this, true, '¡Correcto! Shines es el verbo correcto en Presente Simple para un hecho universal.')">A) shines</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(10, this, false, 'Incorrecto. Shine necesita la -s final.')">B) shine</button>
                         </div>
                         <div id="feed-10" class="feedback-box"></div>
                     </div>
@@ -487,68 +278,59 @@
         <section id="ex3" class="scroll-mt-24">
             <div class="solid-card border-t-8 border-t-fuchsia-500">
                 <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
-                    <h3 class="text-2xl font-black text-slate-800"><svg class="svg-icon text-fuchsia-500 mr-2"><use href="#icon-clock"></use></svg> Ex 3: Present Progressive</h3>
+                    <h3 class="text-2xl font-black text-slate-800"><i class="fas fa-clock text-fuchsia-500 mr-2"></i> Ejercicio 3: Presente Progresivo (Lo que pasa ahora)</h3>
                     <span class="text-sm font-black bg-fuchsia-100 text-fuchsia-700 px-3 py-1 rounded-full">40 PTS</span>
                 </div>
                 
-                <div class="p-6 space-y-8 bg-slate-50">
+                <div class="p-6 space-y-6 bg-slate-50">
+                    <p class="text-sm text-slate-600 font-medium"><b>Explicación:</b> Usa <i>is/are + verbo con -ing</i> para acciones que ocurren en este preciso instante.</p>
                     
-                    <!-- Question 11 -->
+                    <!-- Q11 -->
                     <div class="solid-card bg-white p-6" id="q11">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">11.</span> Look! Sugey _______ in the rain without an umbrella.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">11.</span> Look out the window! It _______ right now.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-11">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(11, this, false, 'Incorrecto. Walks se usa para rutinas, pero la palabra Look! indica que está pasando en este momento.')">A) walks</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(11, this, true, '¡Correcto! Look! indica que la acción ocurre justo ahora. Usamos is + verbo(ing): is walking.')">B) is walking</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(11, this, false, 'Incorrecto. Faltó el verbo to be (is).')">C) walking</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(11, this, false, 'Incorrecto. Are se usa para plurales, y Sugey es singular (she).')">D) are walking</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(11, this, false, 'Incorrecto. Rains se usa para rutinas, no para el momento actual.')">A) rains</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(11, this, true, '¡Correcto! Usamos is raining porque la palabra Look! indica que ocurre ahora.')">B) is raining</button>
                         </div>
                         <div id="feed-11" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 12 -->
+                    <!-- Q12 -->
                     <div class="solid-card bg-white p-6" id="q12">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">12.</span> I can't play CS2 right now. A huge storm _______, and the electricity might go out.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">12.</span> Listen to the wind! It _______ very strongly today.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-12">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(12, this, false, 'Incorrecto. Approaching necesita el verbo to be antes.')">A) approaching</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(12, this, false, 'Incorrecto. Approaches es Present Simple, pero la oración dice right now.')">B) approaches</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(12, this, false, 'Incorrecto. Are se usa para plurales; a huge storm es singular (it).')">C) are approaching</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(12, this, true, '¡Excelente! Right now indica una acción en progreso. A huge storm es singular (it), así que usamos: is approaching.')">D) is approaching</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(12, this, true, '¡Correcto! Is blowing es la forma progresiva correcta para la acción que escuchamos en este momento.')">A) is blowing</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(12, this, false, 'Incorrecto. Blows indica rutina.')">B) blows</button>
                         </div>
                         <div id="feed-12" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 13 -->
+                    <!-- Q13 -->
                     <div class="solid-card bg-white p-6" id="q13">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">13.</span> Listen to the wind! It _______ extremely hard tonight.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">13.</span> Take an umbrella. Dark clouds _______ fast.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-13">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(13, this, true, '¡Correcto! Listen! nos ubica en el momento presente. La estructura correcta es is + blowing.')">A) is blowing</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(13, this, false, 'Incorrecto. Blows es para rutinas o hechos generales.')">B) blows</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(13, this, false, 'Incorrecto. Are blowing se usaría para un sujeto plural.')">C) are blowing</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(13, this, false, 'Incorrecto. Faltó el verbo to be (is).')">D) blowing</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(13, this, true, '¡Correcto! Las nubes (plural: they) toman are + moving.')">A) are moving</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(13, this, false, 'Incorrecto. Is se usa solo para singulares.')">B) is moving</button>
                         </div>
                         <div id="feed-13" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 14 -->
+                    <!-- Q14 -->
                     <div class="solid-card bg-white p-6" id="q14">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">14.</span> Why _______ a heavy coat? It is perfectly warm inside the classroom.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">14.</span> It is hot outside. Why _______ a heavy jacket?</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-14">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(14, this, false, 'Incorrecto. Do you wear pregunta sobre una rutina general (¿por qué sueles usar un abrigo?).')">A) do you wear</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(14, this, false, 'Incorrecto. You wear no tiene estructura de pregunta.')">B) you wear</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(14, this, true, '¡Correcto! Estás preguntando sobre lo que la persona tiene puesto en este exacto momento. La estructura interrogativa es Are + you + wearing.')">C) are you wearing</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(14, this, false, 'Incorrecto. Is no concuerda con el sujeto you.')">D) is you wearing</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(14, this, false, 'Incorrecto. Do you wear pregunta por hábito general.')">A) do you wear</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(14, this, true, '¡Correcto! Are you wearing pregunta qué ropa tienes puesta en este preciso instante.')">B) are you wearing</button>
                         </div>
                         <div id="feed-14" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 15 -->
+                    <!-- Q15 -->
                     <div class="solid-card bg-white p-6" id="q15">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">15.</span> The mechanic _______ the Derby's clutch right now while it rains outside.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">15.</span> A big storm _______ right now. Be careful!</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-15">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(15, this, false, 'Incorrecto. Repairs se usa para rutinas o hechos.')">A) repairs</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(15, this, false, 'Incorrecto. Are se usa para plurales y el mecánico es singular.')">B) are repairing</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(15, this, false, 'Incorrecto. Faltó el verbo to be.')">C) repairing</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(15, this, true, '¡Correcto! Right now nos indica que debemos usar Present Progressive. El mecánico (he) lleva is + repairing.')">D) is repairing</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(15, this, true, '¡Correcto! Is approaching indica que la tormenta se acerca en este momento.')">A) is approaching</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(15, this, false, 'Incorrecto. Approaches es Presente Simple.')">B) approaches</button>
                         </div>
                         <div id="feed-15" class="feedback-box"></div>
                     </div>
@@ -562,68 +344,59 @@
         <section id="ex4" class="scroll-mt-24">
             <div class="solid-card border-t-8 border-t-amber-500">
                 <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
-                    <h3 class="text-2xl font-black text-slate-800"><svg class="svg-icon text-amber-500 mr-2"><use href="#icon-heart"></use></svg> Ex 4: Feelings & Stative Verbs</h3>
+                    <h3 class="text-2xl font-black text-slate-800"><i class="fas fa-heart text-amber-500 mr-2"></i> Ejercicio 4: Sentimientos y Sensaciones con el Clima</h3>
                     <span class="text-sm font-black bg-amber-100 text-amber-700 px-3 py-1 rounded-full">40 PTS</span>
                 </div>
                 
-                <div class="p-6 space-y-8 bg-slate-50">
+                <div class="p-6 space-y-6 bg-slate-50">
+                    <p class="text-sm text-slate-600 font-medium"><b>Explicación:</b> Los verbos de estados o sentimientos (como <i>want</i> o <i>feel</i>) no llevan <b>-ing</b>, se usan en Presente Simple.</p>
                     
-                    <!-- Question 16 -->
+                    <!-- Q16 -->
                     <div class="solid-card bg-white p-6" id="q16">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">16.</span> It is freezing today. I _______ a hot coffee.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">16.</span> It is freezing today. I _______ a hot chocolate.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-16">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(16, this, false, 'Incorrecto. Want es un verbo estático, rara vez se usa en forma progresiva (-ing).')">A) am wanting</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(16, this, true, '¡Correcto! Want es un verbo estático (expresa un estado/deseo). Se usa en Present Simple incluso si lo deseas ahora mismo.')">B) want</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(16, this, false, 'Incorrecto. Wants es para he, she, it.')">C) wants</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(16, this, false, 'Incorrecto. Wanting no puede ir solo, y el verbo want casi nunca lleva -ing.')">D) wanting</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(16, this, false, 'Incorrecto. Want es un verbo de deseo/estado, no lleva -ing.')">A) am wanting</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(16, this, true, '¡Correcto! Usamos want en Presente Simple porque expresa un deseo actual.')">B) want</button>
                         </div>
                         <div id="feed-16" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 17 -->
+                    <!-- Q17 -->
                     <div class="solid-card bg-white p-6" id="q17">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">17.</span> I _______ sunny days at the beach in Sayulita.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">17.</span> I _______ sunny days at the beach.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-17">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(17, this, true, '¡Correcto! Love es un verbo estático (sentimiento). Se usa en Present Simple.')">A) love</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(17, this, false, 'Incorrecto. Love es un verbo de estado (sentimiento) y rara vez se utiliza con -ing.')">B) am loving</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(17, this, false, 'Incorrecto. Loves es para he, she, it.')">C) loves</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(17, this, false, 'Incorrecto. Is loving usa el auxiliar equivocado para I, y además el verbo es estático.')">D) is loving</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(17, this, true, '¡Correcto! Love es un verbo de sentimiento y va en Presente Simple.')">A) love</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(17, this, false, 'Incorrecto. No se dice am loving con -ing.')">B) am loving</button>
                         </div>
                         <div id="feed-17" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 18 -->
+                    <!-- Q18 -->
                     <div class="solid-card bg-white p-6" id="q18">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">18.</span> It is 40 degrees outside! We _______ air conditioning in the school.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">18.</span> It is very hot. We _______ air conditioning right now.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-18">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(18, this, false, 'Incorrecto. Are needing suena antinatural porque need es un verbo estático (necesidad/estado).')">A) are needing</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(18, this, false, 'Incorrecto. Needs es para he, she, it. Aquí el sujeto es we.')">B) needs</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(18, this, true, '¡Correcto! Need es un verbo estático. Se usa en Present Simple (we need).')">C) need</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(18, this, false, 'Incorrecto. Is needing usa el auxiliar incorrecto y además la forma -ing es errónea para este verbo.')">D) is needing</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(18, this, true, '¡Correcto! Need es un estado de necesidad, se usa en Presente Simple (we need).')">A) need</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(18, this, false, 'Incorrecto. Need no se usa con -ing.')">B) are needing</button>
                         </div>
                         <div id="feed-18" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 19 -->
+                    <!-- Q19 -->
                     <div class="solid-card bg-white p-6" id="q19">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">19.</span> She _______ when it snows because it makes driving difficult.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">19.</span> She _______ sad when the weather is cloudy and grey.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-19">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(19, this, false, 'Incorrecto. Hate es un verbo de sentimiento (estático), normalmente no lleva -ing.')">A) is hating</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(19, this, true, '¡Correcto! Hate es un verbo estático. Como el sujeto es She, agregamos la s: hates.')">B) hates</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(19, this, false, 'Incorrecto. Hate le falta la s, que es requerida para he/she/it en Present Simple.')">C) hate</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(19, this, false, 'Incorrecto. Are hating tiene el auxiliar y la terminación incorrecta.')">D) are hating</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(19, this, true, '¡Correcto! Feels lleva -s porque el sujeto es She (tercera persona).')">A) feels</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(19, this, false, 'Incorrecto. Feel le falta la -s.')">B) feel</button>
                         </div>
                         <div id="feed-19" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 20 -->
+                    <!-- Q20 -->
                     <div class="solid-card bg-white p-6" id="q20">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">20.</span> Do you _______ hot weather or cold weather?</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">20.</span> What is your favorite season? I _______ autumn.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-20">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(20, this, false, 'Incorrecto. Preferring no puede ir en una oración que ya tiene el auxiliar Do.')">A) preferring</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(20, this, false, 'Incorrecto. Are preferring mezcla auxiliares de distintos tiempos y usa -ing en un verbo estático.')">B) are preferring</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(20, this, false, 'Incorrecto. Prefers solo se usa para he/she/it en afirmaciones, no en preguntas con you.')">C) prefers</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(20, this, true, '¡Correcto! Prefer es un verbo estático. La pregunta ya está estructurada con el auxiliar Do, así que el verbo queda en forma base: prefer.')">D) prefer</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(20, this, false, 'Incorrecto. Preferring no es correcto con -ing.')">A) am preferring</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(20, this, true, '¡Correcto! Prefer es un verbo estático, va en Presente Simple.')">B) prefer</button>
                         </div>
                         <div id="feed-20" class="feedback-box"></div>
                     </div>
@@ -637,97 +410,83 @@
         <section id="ex5" class="scroll-mt-24">
             <div class="solid-card border-t-8 border-t-indigo-500">
                 <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
-                    <h3 class="text-2xl font-black text-slate-800"><svg class="svg-icon text-indigo-500 mr-2"><use href="#icon-mix"></use></svg> Ex 5: Ultimate Mix</h3>
+                    <h3 class="text-2xl font-black text-slate-800"><i class="fas fa-random text-indigo-500 mr-2"></i> Ejercicio 5: Práctica Mixta (Simple vs. Progresivo)</h3>
                     <span class="text-sm font-black bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full">40 PTS</span>
                 </div>
                 
-                <div class="p-6 space-y-8 bg-slate-50">
+                <div class="p-6 space-y-6 bg-slate-50">
+                    <p class="text-sm text-slate-600 font-medium"><b>Explicación:</b> Lee con atención si la oración habla de una rutina general (Simple) o de algo temporal que pasa ahora (Progresivo).</p>
                     
-                    <!-- Question 21 -->
+                    <!-- Q21 -->
                     <div class="solid-card bg-white p-6" id="q21">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">21.</span> I usually _______ to "Truce" by Twenty One Pilots when it ______.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">21.</span> I usually _______ home when it rains, but today I _______ outside.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-21">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(21, this, false, 'Incorrecto. La primera parte tiene usually, por lo que requiere Present Simple, no progresivo.')">A) am listening / is raining</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(21, this, true, '¡Correcto! La oración establece una rutina (usually), por lo que listen y rains (con s por ser it) deben estar en Present Simple.')">B) listen / rains</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(21, this, false, 'Incorrecto. Am listening no encaja con usually.')">C) am listening / rains</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(21, this, false, 'Incorrecto. Is raining se usa para cosas pasando ahorita mismo, no rutinas generales.')">D) listen / is raining</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(21, this, true, '¡Correcto! Usually indica rutina (stay), y today indica una acción temporal actual (am walking).')">A) stay / am walking</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(21, this, false, 'Incorrecto. Am staying no concuerda con usually.')">B) am staying / walk</button>
                         </div>
                         <div id="feed-21" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 22 -->
+                    <!-- Q22 -->
                     <div class="solid-card bg-white p-6" id="q22">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">22.</span> My cat usually _______ all day, but right now he _______ the thunderstorm.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">22.</span> Look! The sun _______, but it _______ cold.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-22">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(22, this, false, 'Incorrecto. Sleeps está bien, pero watches no encaja con la frase right now, que pide progresivo.')">A) sleeps / watches</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(22, this, false, 'Incorrecto. Is sleeping no concuerda con usually.')">B) is sleeping / is watching</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(22, this, true, '¡Correcto! Primero hay una rutina (usually sleeps), seguida de una acción que interrumpe la rutina en este momento (right now he is watching).')">C) sleeps / is watching</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(22, this, false, 'Incorrecto.')">D) sleep / is watching</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(22, this, true, '¡Correcto! Look! pide progresivo (is shining), y para describir el estado del clima usamos is.')">A) is shining / is</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(22, this, false, 'Incorrecto. Shines es para rutinas.')">B) shines / is being</button>
                         </div>
                         <div id="feed-22" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 23 -->
+                    <!-- Q23 -->
                     <div class="solid-card bg-white p-6" id="q23">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">23.</span> Every summer, we _______ to the lagoon, but this year the climate _______.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">23.</span> Every winter we _______ warm clothes, but right now we _______ shorts because of a heatwave.</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-23">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(23, this, true, '¡Correcto! Every summer indica rutina (go). This year indica una situación temporal o en progreso (is changing).')">A) go / is changing</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(23, this, false, 'Incorrecto. Changes es simple, pero estamos hablando de algo temporal que está ocurriendo este año.')">B) go / changes</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(23, this, false, 'Incorrecto. Are going no encaja con el marcador de rutina Every summer.')">C) are going / is changing</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(23, this, false, 'Incorrecto.')">D) goes / change</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(23, this, true, '¡Correcto! Every winter es rutina (wear), y right now es el momento actual (are wearing).')">A) wear / are wearing</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(23, this, false, 'Incorrecto. Are wearing no va con el marcador de rutina every winter.')">B) are wearing / wear</button>
                         </div>
                         <div id="feed-23" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 24 -->
+                    <!-- Q24 -->
                     <div class="solid-card bg-white p-6" id="q24">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">24.</span> The academic coordinator _______ the spelling bee list right now because the weather outside _______ terrible.</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">24.</span> What _______ you usually _______ when the weather is stormy?</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-24">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(24, this, false, 'Incorrecto. Is being terrible es innecesario, el verbo to be se usa en su forma simple para describir estados.')">A) prepares / is being</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(24, this, false, 'Incorrecto. Right now requiere progresivo (is preparing).')">B) prepares / is</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(24, this, true, '¡Excelente! Right now requiere is preparing. Para describir cómo es el clima, simplemente usamos is, ya que ser/estar es un estado.')">C) is preparing / is</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(24, this, false, 'Incorrecto.')">D) is preparing / is being</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(24, this, true, '¡Correcto! Al preguntar por un hábito o rutina con usually, usamos el auxiliar do y el verbo do.')">A) do / do</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(24, this, false, 'Incorrecto. Are / doing se usaría para el momento exacto, ignorando usually.')">B) are / doing</button>
                         </div>
                         <div id="feed-24" class="feedback-box"></div>
                     </div>
 
-                    <!-- Question 25 -->
+                    <!-- Q25 -->
                     <div class="solid-card bg-white p-6" id="q25">
-                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">25.</span> It _______ in our city, but look! It _______ right now!</p>
+                        <p class="font-bold text-slate-800 text-lg mb-4"><span class="text-slate-400">25.</span> It rarely _______ here, but look! It _______ right now!</p>
                         <div class="grid sm:grid-cols-2 gap-3" id="opts-25">
-                            <button class="opt-btn" onclick="Logic.handleAnswer(25, this, false, 'Incorrecto.')">A) is rarely snowing / snows</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(25, this, true, '¡Impresionante! rarely indica un hecho/rutina (rarely snows), mientras que look! y right now exigen progresivo (is snowing).')">B) rarely snows / is snowing</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(25, this, false, 'Incorrecto. Rare snows no tiene sentido gramatical aquí.')">C) rarely snows / snows</button>
-                            <button class="opt-btn" onclick="Logic.handleAnswer(25, this, false, 'Incorrecto.')">D) is rarely snowing / is snowing</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(25, this, true, '¡Correcto! Rarely indica hecho general (snows), y right now indica acción actual (is snowing).')">A) snows / is snowing</button>
+                            <button class="opt-btn" onclick="Logic.handleAnswer(25, this, false, 'Incorrecto. Is snowing no encaja con rarely.')">B) is snowing / snows</button>
                         </div>
                         <div id="feed-25" class="feedback-box"></div>
                     </div>
                 </div>
             </div>
             
-            <!-- Finish Section -->
+            <!-- FINISH BUTTON -->
             <div class="text-center mt-12 pb-8">
-                <button id="finish-btn" onclick="Logic.finishLab()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 px-12 rounded-full shadow-2xl text-xl uppercase tracking-widest transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
-                    Finish & Calculate Score
+                <button onclick="Logic.finishLab()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 px-12 rounded-full shadow-2xl text-xl uppercase tracking-widest transition-transform hover:scale-105">
+                    Terminar y Ver Puntaje Final
                 </button>
             </div>
         </section>
 
     </main>
 
-    <!-- ==========================================
-         RESULTS MODAL WITH CONFETTI CANVAS
-    =========================================== -->
+    <!-- RESULTS MODAL -->
     <div id="results-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[100] hidden flex-col justify-center items-center p-4">
-        <!-- Confetti Canvas -->
-        <canvas id="confetti-canvas" class="absolute inset-0 pointer-events-none z-0"></canvas>
-        
-        <div class="bg-white rounded-3xl p-10 max-w-sm w-full text-center shadow-2xl relative z-10 transform scale-95 transition-transform duration-300" id="modal-content">
-            <div class="w-24 h-24 bg-gradient-to-tr from-sky-400 to-blue-600 rounded-full text-white text-5xl flex items-center justify-center mx-auto mb-6 shadow-xl border-4 border-white">
+        <div class="bg-white rounded-3xl p-10 max-w-sm w-full text-center shadow-2xl relative z-10">
+            <div class="w-24 h-24 bg-sky-500 rounded-full text-white text-5xl flex items-center justify-center mx-auto mb-6 shadow-xl">
                 <i class="fas fa-trophy"></i>
             </div>
-            <h2 class="text-4xl font-black text-slate-900 mb-2">Lab Complete!</h2>
-            <p class="text-slate-500 font-bold mb-6 uppercase tracking-widest text-sm">Your Final Score</p>
+            <h2 class="text-4xl font-black text-slate-900 mb-2">¡Práctica Terminada!</h2>
+            <p class="text-slate-500 font-bold mb-6 uppercase tracking-widest text-sm">Tu puntaje final es:</p>
             
             <div class="bg-slate-50 border border-slate-200 py-6 rounded-2xl mb-8 shadow-inner">
                 <div class="text-7xl font-black text-sky-600 tracking-tight"><span id="final-score">0</span></div>
@@ -735,14 +494,12 @@
             </div>
 
             <button onclick="location.reload()" class="w-full bg-slate-900 text-white font-black uppercase tracking-widest py-4 rounded-xl hover:bg-slate-800 transition shadow-lg">
-                Restart Training
+                Intentar de Nuevo
             </button>
         </div>
     </div>
 
-    <!-- ==========================================
-         JAVASCRIPT LOGIC ENGINE
-    =========================================== -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
         const Logic = {
             score: 0,
@@ -759,7 +516,6 @@
             addScore(points) {
                 this.score += points;
                 if (this.score > this.maxScore) this.score = this.maxScore;
-                
                 document.getElementById('score-display').innerText = this.score;
                 
                 const box = document.getElementById('score-container');
@@ -773,139 +529,49 @@
                 const feedbackDiv = document.getElementById(`feed-${qNum}`);
                 
                 if (container.dataset.answered === 'true') return;
-                
-                // Mark as answered
                 container.dataset.answered = 'true';
+                
                 this.answeredQuestions++;
                 this.updateProgress();
 
                 const allBtns = container.querySelectorAll('.opt-btn');
-                allBtns.forEach(b => {
-                    b.disabled = true; // Disable all clicks
-                });
+                allBtns.forEach(b => b.disabled = true);
 
-                let iconHTML = '';
                 if (isCorrect) {
                     btnElement.classList.add('correct');
                     this.addScore(8);
-                    iconHTML = `<svg class="svg-icon text-emerald-500 mr-2"><use href="#icon-check"></use></svg>`;
                 } else {
                     btnElement.classList.add('incorrect');
-                    iconHTML = `<svg class="svg-icon text-red-500 mr-2"><use href="#icon-x"></use></svg>`;
-                    
-                    // Highlight the correct one visually
                     allBtns.forEach(b => {
                         if (b.getAttribute('onclick').includes('true')) {
                             b.classList.add('correct');
-                            b.disabled = false; // Keeps hover styles from fully dying, visually better
-                            b.style.pointerEvents = 'none'; // But prevents actual clicking
                         }
                     });
                 }
 
-                // Render Feedback
                 const colorClass = isCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-red-50 border-red-200 text-red-900';
                 feedbackDiv.innerHTML = `
-                    <div class="mt-4 p-4 rounded-xl border ${colorClass} flex items-start shadow-sm">
-                        <div class="flex-shrink-0 mt-0.5">${iconHTML}</div>
+                    <div class="p-4 rounded-xl border ${colorClass} shadow-sm">
                         <p class="font-bold text-sm leading-relaxed">${feedbackText}</p>
                     </div>
                 `;
                 
-                // Trigger CSS expansion
-                setTimeout(() => {
-                    feedbackDiv.classList.add('show');
-                }, 10);
+                setTimeout(() => feedbackDiv.classList.add('show'), 10);
             },
 
             finishLab() {
                 if (this.answeredQuestions < this.totalQuestions) {
-                    alert(`Please answer all questions before finishing! You have answered ${this.answeredQuestions} out of 25.`);
+                    alert(`¡Aún te faltan preguntas por responder! Has respondido ${this.answeredQuestions} de 25.`);
                     return;
                 }
 
                 document.getElementById('final-score').innerText = this.score;
                 const modal = document.getElementById('results-modal');
-                const content = document.getElementById('modal-content');
-                
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
-                
-                setTimeout(() => {
-                    content.classList.remove('scale-95');
-                    if (this.score >= 150) {
-                        ConfettiEngine.start();
-                    }
-                }, 50);
-            }
-        };
-
-        // --- CONFETTI ANIMATION ENGINE ---
-        const ConfettiEngine = {
-            canvas: null,
-            ctx: null,
-            particles: [],
-            colors: ['#0ea5e9', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
-            animationId: null,
-
-            start() {
-                this.canvas = document.getElementById('confetti-canvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.resize();
-                window.addEventListener('resize', () => this.resize());
-
-                for (let i = 0; i < 150; i++) {
-                    this.particles.push({
-                        x: Math.random() * this.canvas.width,
-                        y: Math.random() * this.canvas.height - this.canvas.height,
-                        r: Math.random() * 6 + 2,
-                        dx: Math.random() * 4 - 2,
-                        dy: Math.random() * 4 + 2,
-                        color: this.colors[Math.floor(Math.random() * this.colors.length)],
-                        tilt: Math.floor(Math.random() * 10) - 10,
-                        tiltAngleInc: (Math.random() * 0.07) + 0.05,
-                        tiltAngle: 0
-                    });
-                }
-                this.render();
-            },
-
-            resize() {
-                this.canvas.width = window.innerWidth;
-                this.canvas.height = window.innerHeight;
-            },
-
-            render() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.particles.forEach((p, index) => {
-                    p.tiltAngle += p.tiltAngleInc;
-                    p.y += (Math.cos(p.tiltAngle) + 1 + p.r / 2) / 2;
-                    p.x += Math.sin(p.tiltAngle) * 2;
-
-                    this.ctx.beginPath();
-                    this.ctx.lineWidth = p.r;
-                    this.ctx.strokeStyle = p.color;
-                    this.ctx.moveTo(p.x + p.tilt + p.r, p.y);
-                    this.ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r);
-                    this.ctx.stroke();
-
-                    if (p.y > this.canvas.height) {
-                        this.particles[index] = {
-                            x: Math.random() * this.canvas.width,
-                            y: -10,
-                            r: p.r,
-                            dx: p.dx,
-                            dy: p.dy,
-                            color: p.color,
-                            tilt: p.tilt,
-                            tiltAngleInc: p.tiltAngleInc,
-                            tiltAngle: p.tiltAngle
-                        };
-                    }
-                });
-                this.animationId = requestAnimationFrame(() => this.render());
             }
         };
     </script>
 </body>
 </html>
+
