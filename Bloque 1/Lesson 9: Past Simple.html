@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Entrenamiento: Pasado Simple</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background-color: #f8fafc;
+            color: #334155;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(244, 63, 94, 0.04) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Glassmorphism robusto */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+            border-radius: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Botones interactivos suaves */
+        .interactive-btn { 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .interactive-btn:active:not(:disabled) { 
+            transform: scale(0.95); 
+        }
+
+        /* Scrollbar estilizada */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(241, 245, 249, 1); }
+        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.8); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 1); }
+        
+        .bg-cover-card { background-size: cover; background-position: center; }
+        
+        /* Animaciones de Scroll */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Chat Simulator Styles */
+        .chat-bubble-bot { background-color: #f1f5f9; color: #334155; border-bottom-left-radius: 0; }
+        .chat-bubble-user { background-color: #3b82f6; color: white; border-bottom-right-radius: 0; align-self: flex-end; }
+        
+        /* Animación para feedback */
+        @keyframes pop {
+            0% { transform: scale(0.9); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: pop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-200 selection:text-blue-900 flex flex-col min-h-screen">
+
+    <!-- Navegación Fija (Sticky) -->
+    <nav class="w-full bg-white/95 backdrop-blur-xl border-b border-slate-200 z-50 sticky top-0 shadow-sm transition-all">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white text-lg sm:text-xl shadow-md">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <div class="hidden sm:block">
+                    <h1 class="font-bold text-lg sm:text-xl text-slate-800 tracking-wide leading-tight">Past Simple Gym</h1>
+                    <p class="text-[10px] sm:text-xs font-bold text-blue-500 uppercase tracking-widest">Práctica Personal</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 sm:gap-6">
+                <!-- Marcador de Puntaje Global -->
+                <div id="score-badge" class="bg-amber-100 text-amber-600 px-4 py-2 rounded-xl text-sm sm:text-base font-extrabold border border-amber-200 shadow-sm flex items-center gap-2 transition-transform duration-300">
+                    <i class="fas fa-star text-amber-500"></i> 
+                    <span><span id="score-display">0</span> / 20 pts</span>
+                </div>
+            </div>
+        </div>
+        <!-- Barra de progreso de lectura (Scroll) -->
+        <div class="w-full bg-slate-100 h-1.5">
+            <div id="scroll-progress" class="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 h-full w-0"></div>
+        </div>
+    </nav>
+
+    <!-- Contenedor Principal (Una sola página con scroll) -->
+    <main class="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 py-10 flex flex-col gap-24 sm:gap-32 pb-32">
+        
+        <!-- SECCIÓN 0: Intro -->
+        <section id="intro" class="text-center pt-10 sm:pt-20 reveal">
+            <div class="inline-block px-5 py-2 rounded-full bg-blue-50 text-blue-600 font-bold text-xs sm:text-sm tracking-widest uppercase mb-6 border border-blue-100 shadow-sm">
+                Entrenamiento Intensivo ⚡
+            </div>
+            <h2 class="text-5xl sm:text-6xl md:text-7xl font-extrabold text-slate-800 mb-6 tracking-tight leading-tight">
+                Domina el <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600">Pasado Simple</span>
+            </h2>
+            <p class="text-slate-600 text-base sm:text-lg md:text-xl font-medium max-w-2xl mx-auto mb-10 leading-relaxed">
+                Desplázate hacia abajo para completar los retos. Gana puntos respondiendo correctamente. ¡Todo está en esta página para que no haya interrupciones!
+            </p>
+            <a href="#section-verbs" class="inline-flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 px-10 rounded-2xl shadow-lg transition interactive-btn text-lg gap-3">
+                Comenzar <i class="fas fa-arrow-down animate-bounce"></i>
+            </a>
+        </section>
+
+        <!-- SECCIÓN 1: Verbos a Utilizar -->
+        <section id="section-verbs" class="reveal pt-8 scroll-mt-24">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl shadow-sm shrink-0">📖</div>
+                <div>
+                    <h2 class="text-3xl font-extrabold text-slate-800">1. Tus Herramientas</h2>
+                    <p class="text-slate-500 font-medium text-lg mt-1">Estos son los 10 verbos clave de hoy. Estudia su forma base y su forma en pasado.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6" id="verbs-container">
+                <!-- Se inyectan vía JS para mantener el HTML limpio -->
+            </div>
+            
+            <div class="text-center mt-10">
+                <a href="#section-vocab" class="text-indigo-500 font-bold hover:text-indigo-700 transition"><i class="fas fa-chevron-down mr-2"></i>Ir a la primera prueba</a>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: Vocabulario -->
+        <section id="section-vocab" class="reveal pt-8 scroll-mt-24">
+             <div class="flex items-center gap-4 mb-8">
+                <div class="w-14 h-14 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center text-3xl shadow-sm shrink-0">🧠</div>
+                <div>
+                    <h2 class="text-3xl font-extrabold text-slate-800">2. Memoria de Verbos</h2>
+                    <p class="text-slate-500 font-medium text-lg mt-1">Demuestra que recuerdas la forma correcta en pasado.</p>
+                </div>
+            </div>
+            <div class="glass-card p-6 sm:p-10 border-t-4 border-t-teal-400 shadow-xl" id="quiz-vocab"></div>
+        </section>
+
+        <!-- SECCIÓN 3: Afirmativo -->
+        <section id="section-affirmative" class="reveal pt-8 scroll-mt-24">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl shadow-sm shrink-0">✅</div>
+                <div>
+                    <h2 class="text-3xl font-extrabold text-slate-800">3. Construcción Afirmativa</h2>
+                    <p class="text-slate-500 font-medium text-lg mt-1">Completa la oración usando el verbo en pasado.</p>
+                </div>
+            </div>
+            <div class="glass-card p-6 sm:p-10 border-t-4 border-t-emerald-400 shadow-xl" id="quiz-aff"></div>
+        </section>
+
+        <!-- SECCIÓN 4: Negativo -->
+        <section id="section-negative" class="reveal pt-8 scroll-mt-24">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center text-3xl shadow-sm shrink-0">❌</div>
+                <div>
+                    <h2 class="text-3xl font-extrabold text-slate-800">4. Forma Negativa</h2>
+                    <p class="text-slate-500 font-medium text-lg mt-1">Recuerda la regla de oro: <b>didn't</b> + el verbo en forma base (normal).</p>
+                </div>
+            </div>
+            <div class="glass-card p-6 sm:p-10 border-t-4 border-t-rose-400 shadow-xl" id="quiz-neg"></div>
+        </section>
+
+        <!-- SECCIÓN 5: Preguntas -->
+        <section id="section-questions" class="reveal pt-8 scroll-mt-24">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-3xl shadow-sm shrink-0">❓</div>
+                <div>
+                    <h2 class="text-3xl font-extrabold text-slate-800">5. Haciendo Preguntas</h2>
+                    <p class="text-slate-500 font-medium text-lg mt-1">Iniciamos la pregunta con <b>Did</b> y el verbo se mantiene en su forma base.</p>
+                </div>
+            </div>
+            <div class="glass-card p-6 sm:p-10 border-t-4 border-t-purple-400 shadow-xl" id="quiz-q"></div>
+        </section>
+
+        <!-- SECCIÓN 6: Lectura -->
+        <section id="section-reading" class="reveal pt-8 scroll-mt-24">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-3xl shadow-sm shrink-0">📖</div>
+                <div>
+                    <h2 class="text-3xl font-extrabold text-slate-800">6. Comprensión Lectora</h2>
+                    <p class="text-slate-500 font-medium text-lg mt-1">Lee la historia y decide si las oraciones de abajo son Verdaderas (True) o Falsas (False).</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 sm:p-8 mb-8 rounded-3xl border-l-8 border-l-amber-400 shadow-md">
+                <h3 class="font-extrabold text-2xl mb-4 text-slate-800">A Busy Day! 🏃‍♂️</h3>
+                <p class="text-slate-700 leading-relaxed text-lg font-medium">
+                    Yesterday, I worked on my computer all morning. In the afternoon, I watched a movie with my sister. Then, I was very hungry, so we ate some pizza. At night, I listened to some music and spoke to my best friend on the phone. I didn't sleep a lot because I read a very good book!
+                </p>
+            </div>
+            
+            <div class="glass-card p-6 sm:p-10 border-t-4 border-t-amber-400 shadow-xl" id="quiz-read"></div>
+        </section>
+
+        <!-- SECCIÓN 7: Simulador de Chat -->
+        <section id="section-chat" class="reveal pt-8 scroll-mt-24">
+             <div class="flex items-center gap-4 mb-8">
+                <div class="w-14 h-14 bg-cyan-100 text-cyan-600 rounded-2xl flex items-center justify-center text-3xl shadow-sm shrink-0">💬</div>
+                <div>
+                    <h2 class="text-3xl font-extrabold text-slate-800">7. Simulador de Conversación</h2>
+                    <p class="text-slate-500 font-medium text-lg mt-1">Lee el mensaje y elige la respuesta correcta para continuar charlando.</p>
+                </div>
+            </div>
+
+            <div class="glass-card border-t-4 border-t-cyan-500 shadow-2xl overflow-hidden flex flex-col bg-white" style="height: 600px;">
+                <!-- Chat Área -->
+                <div class="flex-grow bg-slate-50 p-4 sm:p-6 overflow-y-auto flex flex-col gap-4" id="chat-messages">
+                    <!-- Los mensajes aparecen aquí -->
+                </div>
+                
+                <!-- Opciones -->
+                <div class="p-4 sm:p-6 bg-white border-t border-slate-200" id="chat-choices">
+                    <!-- Los botones se inyectan aquí -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 8: Resultados Finales -->
+        <section id="section-results" class="reveal pt-16 sm:pt-24 pb-20 text-center scroll-mt-24">
+            <div class="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-full mx-auto flex items-center justify-center text-5xl sm:text-6xl mb-8 shadow-xl">
+                🏆
+            </div>
+            <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-800 mb-4 tracking-tight">Práctica Finalizada</h2>
+            <p class="text-slate-500 text-lg sm:text-xl font-medium mb-10 max-w-xl mx-auto">
+                ¡Llegaste al final de la página! Aquí está el resultado de tu entrenamiento.
+            </p>
+            
+            <div class="bg-white p-8 sm:p-12 max-w-sm mx-auto mb-10 rounded-[2rem] border-t-8 border-t-amber-500 shadow-2xl transform transition hover:scale-105">
+                <p class="text-slate-400 font-extrabold uppercase tracking-widest text-sm mb-3">Puntaje Final</p>
+                <div class="text-7xl font-extrabold text-slate-800 mb-3"><span id="final-score" class="text-amber-500">0</span><span class="text-3xl text-slate-300">/20</span></div>
+                <p class="text-lg font-bold px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl inline-block" id="score-message">¡Calculando...</p>
+            </div>
+
+            <button onclick="window.scrollTo(0,0); location.reload();" class="bg-slate-800 text-white font-bold py-4 px-10 rounded-2xl hover:bg-slate-700 shadow-lg transition interactive-btn text-lg inline-flex items-center gap-3">
+                <i class="fas fa-redo-alt"></i> Entrenar de Nuevo
+            </button>
+        </section>
+
+    </main>
+
+    <script>
+        // --- 1. SISTEMA DE PUNTUACIÓN ROBUSTO ---
+        let currentScore = 0;
+        const MAX_SCORE = 20;
+
+        function addScore() {
+            currentScore++;
+            const scoreDisplay = document.getElementById('score-display');
+            const scoreBadge = document.getElementById('score-badge');
+            
+            scoreDisplay.innerText = currentScore;
+            
+            // Animación sutil de la medalla
+            scoreBadge.classList.add('scale-110', 'bg-amber-200', 'border-amber-300');
+            setTimeout(() => {
+                scoreBadge.classList.remove('scale-110', 'bg-amber-200', 'border-amber-300');
+            }, 300);
+
+            // Actualizar el resumen final en tiempo real
+            document.getElementById('final-score').innerText = currentScore;
+            
+            let msg = "¡Sigue practicando!";
+            let color = "text-blue-600 bg-blue-50";
+            if(currentScore >= 18) { msg = "¡Perfecto! Eres un maestro. 🌟"; color = "text-amber-600 bg-amber-50"; }
+            else if(currentScore >= 14) { msg = "¡Muy buen trabajo! 👍"; color = "text-emerald-600 bg-emerald-50"; }
+            
+            const msgEl = document.getElementById('score-message');
+            msgEl.innerText = msg;
+            msgEl.className = `text-lg font-bold px-4 py-2 rounded-xl inline-block ${color}`;
+        }
+
+        // --- 2. BASE DE DATOS DE VERBOS ---
+        // Se reemplazó "Buy" y "Go" por "Watch" y "Speak"
+        const verbsData = [
+            { base: "Work", past: "Worked", es: "Trabajar", img: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=300&q=80" },
+            { base: "Sleep", past: "Slept", es: "Dormir", img: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=300&q=80" },
+            { base: "Drink", past: "Drank", es: "Beber", img: "https://images.unsplash.com/photo-1525088553748-01d6e243ceb7?w=300&q=80" },
+            { base: "Read", past: "Read", es: "Leer", img: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&q=80" },
+            { base: "Write", past: "Wrote", es: "Escribir", img: "https://images.unsplash.com/photo-1455390582262-044cdead27d8?w=300&q=80" },
+            { base: "Listen", past: "Listened", es: "Escuchar", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80" },
+            { base: "Play", past: "Played", es: "Jugar", img: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=300&q=80" },
+            { base: "Eat", past: "Ate", es: "Comer", img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=300&q=80" },
+            { base: "Watch", past: "Watched", es: "Mirar/Ver", img: "https://images.unsplash.com/photo-1585647347384-259e9a4f15d2?w=300&q=80" },
+            { base: "Speak", past: "Spoke", es: "Hablar", img: "https://images.unsplash.com/photo-1573164713988-8665fc963095?w=300&q=80" }
+        ];
+
+        // --- 3. DATOS DE LOS QUIZZES ---
+        const quizVocab = [
+            { q: "¿Cuál es el pasado de <b>WORK</b>?", opts: ["Workked", "Worked", "Wrought"], ans: 1 },
+            { q: "¿Cuál es el pasado de <b>SLEEP</b>?", opts: ["Slept", "Sleeped", "Slapt"], ans: 0 },
+            { q: "¿Cuál es el pasado de <b>EAT</b>?", opts: ["Eated", "Ate", "Oat"], ans: 1 },
+            { q: "¿Cuál es el pasado de <b>SPEAK</b>?", opts: ["Spoke", "Speaked", "Spoken"], ans: 0 },
+            { q: "¿Cuál es el pasado de <b>DRINK</b>?", opts: ["Drinked", "Drunk", "Drank"], ans: 2 }
+        ];
+
+        const quizAffirmative = [
+            { q: "Yesterday, I _____ (watch) a great movie.", opts: ["watched", "watch", "watcht"], ans: 0 },
+            { q: "She _____ (play) video games last night.", opts: ["play", "played", "playing"], ans: 1 },
+            { q: "We _____ (speak) to the teacher.", opts: ["speaked", "speak", "spoke"], ans: 2 }
+        ];
+
+        const quizNegative = [
+            { q: "I _____ (not eat) pizza last night.", opts: ["didn't ate", "didn't eat", "don't eat"], ans: 1 },
+            { q: "He _____ (not watch) the game on TV.", opts: ["didn't watch", "didn't watched", "wasn't watch"], ans: 0 },
+            { q: "They _____ (not work) on the project.", opts: ["didn't worked", "not worked", "didn't work"], ans: 2 }
+        ];
+
+        const quizQuestion = [
+            { q: "_____ you _____ (listen) to music?", opts: ["Do / listen", "Did / listen", "Did / listened"], ans: 1 },
+            { q: "What did she _____ (write)?", opts: ["wrote", "write", "writes"], ans: 1 },
+            { q: "Did they _____ (drink) the water?", opts: ["drank", "drinked", "drink"], ans: 2 }
+        ];
+
+        const quizReading = [
+            { q: "The person watched a movie with their sister.", opts: ["True (Verdadero)", "False (Falso)"], ans: 0 },
+            { q: "They ate tacos because they were hungry.", opts: ["True (Verdadero)", "False (Falso)"], ans: 1 },
+            { q: "The person slept a lot.", opts: ["True (Verdadero)", "False (Falso)"], ans: 1 }
+        ];
+
+        // --- 4. RENDERIZADO ROBUSTO DEL DOM ---
+
+        function renderVerbs() {
+            const grid = document.getElementById('verbs-container');
+            grid.innerHTML = verbsData.map(v => `
+                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 flex flex-col transition hover:shadow-md hover:-translate-y-1">
+                    <div class="h-24 sm:h-28 bg-cover-card w-full" style="background-image: url('${v.img}')"></div>
+                    <div class="p-4 text-center bg-white flex-grow flex flex-col justify-center">
+                        <p class="text-[10px] sm:text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-1">${v.es}</p>
+                        <h3 class="text-base sm:text-lg font-bold text-slate-800">${v.base}</h3>
+                        <h3 class="text-base sm:text-lg font-bold text-indigo-500">${v.past}</h3>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Creador de Quizzes Genérico. Usa Dataset para prevenir múltiples clicks.
+        function buildQuiz(containerId, data, color) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            data.forEach((item, idx) => {
+                const block = document.createElement('div');
+                // Dataset 'answered' es la clave para la robustez
+                block.dataset.answered = "false";
+                block.className = `quiz-block bg-white p-5 sm:p-8 rounded-3xl border border-slate-200 mb-6 shadow-sm transition-all`;
+                
+                let htmlStr = `<p class="text-xl font-bold text-slate-800 mb-5 leading-relaxed">${idx+1}. ${item.q}</p>`;
+                htmlStr += `<div class="flex flex-col sm:flex-row gap-3 sm:gap-4">`;
+                
+                item.opts.forEach((opt, i) => {
+                    htmlStr += `<button onclick="checkQuizAnswer(this, ${idx}, ${i}, ${item.ans}, '${color}')" 
+                                class="flex-1 bg-slate-50 border border-slate-200 text-slate-700 font-bold py-4 rounded-2xl hover:bg-slate-100 transition interactive-btn text-lg break-words whitespace-normal shadow-sm">
+                                ${opt}
+                                </button>`;
+                });
+                
+                htmlStr += `</div><div class="feedback-msg hidden mt-5 text-lg"></div>`;
+                block.innerHTML = htmlStr;
+                container.appendChild(block);
+            });
+        }
+
+        // Función de evaluación de respuesta ultra robusta
+        window.checkQuizAnswer = function(btn, qIdx, selectedIdx, correctIdx, color) {
+            const block = btn.closest('.quiz-block');
+            
+            // Seguridad: Si ya se respondió, no hacer nada (Evita sumar puntos extra)
+            if (block.dataset.answered === "true") return;
+            block.dataset.answered = "true";
+
+            const buttons = block.querySelectorAll('button');
+            const feedback = block.querySelector('.feedback-msg');
+
+            // Deshabilitar todos los botones de esta pregunta
+            buttons.forEach(b => {
+                b.disabled = true;
+                b.classList.remove('hover:bg-slate-100', 'interactive-btn');
+                b.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+
+            feedback.classList.remove('hidden');
+
+            if (selectedIdx === correctIdx) {
+                // Correcto
+                addScore();
+                btn.classList.remove('bg-slate-50', 'text-slate-700', 'opacity-50', 'border-slate-200');
+                btn.classList.add(`bg-${color}-500`, 'text-white', 'opacity-100', 'ring-4', `ring-${color}-200`, 'border-transparent');
+                
+                feedback.innerHTML = `<i class="fas fa-check-circle mr-2"></i> ¡Correcto!`;
+                feedback.className = `feedback-msg mt-5 p-4 rounded-2xl font-bold flex items-center text-emerald-700 bg-emerald-50 border border-emerald-200 animate-pop`;
+            } else {
+                // Incorrecto
+                btn.classList.remove('bg-slate-50', 'text-slate-700', 'opacity-50', 'border-slate-200');
+                btn.classList.add('bg-rose-500', 'text-white', 'opacity-100', 'ring-4', 'ring-rose-200', 'border-transparent');
+                
+                // Resaltar la respuesta que era correcta
+                const correctBtn = buttons[correctIdx];
+                correctBtn.classList.remove('opacity-50', 'bg-slate-50', 'text-slate-700');
+                correctBtn.classList.add('opacity-100', `bg-${color}-50`, `text-${color}-600`, `border-${color}-400`);
+
+                feedback.innerHTML = `<i class="fas fa-times-circle mr-2"></i> Incorrecto`;
+                feedback.className = `feedback-msg mt-5 p-4 rounded-2xl font-bold flex items-center text-rose-700 bg-rose-50 border border-rose-200 animate-pop`;
+            }
+        };
+
+
+        // --- 5. SIMULADOR DE CHAT INTERACTIVO ---
+        const chatData = [
+            { 
+                bot: "Hey! What did you do yesterday?", 
+                choices: [
+                    { text: "I watch a movie.", correct: false, trans: "Yo miro una película." },
+                    { text: "I watched a movie.", correct: true, trans: "Yo vi una película." }
+                ] 
+            },
+            { 
+                bot: "Oh, cool! Did you speak to your friends about it?", 
+                choices: [
+                    { text: "Yes, I spoke to them.", correct: true, trans: "Sí, hablé con ellos." },
+                    { text: "Yes, I speaked to them.", correct: false, trans: "Sí, hablé con ellos." }
+                ] 
+            },
+            { 
+                bot: "Awesome! Did you listen to the soundtrack later?", 
+                choices: [
+                    { text: "No, I didn't listened.", correct: false, trans: "No, no escuché." },
+                    { text: "No, I didn't listen.", correct: true, trans: "No, no escuché." }
+                ] 
+            }
+        ];
+
+        let chatStep = 0;
+
+        function renderChatStep() {
+            const msgs = document.getElementById('chat-messages');
+            const choicesContainer = document.getElementById('chat-choices');
+            
+            // Si terminamos, mensaje final y botón para ir a resultados
+            if(chatStep >= chatData.length) {
+                choicesContainer.innerHTML = `
+                    <div class="text-center py-4">
+                        <a href="#section-results" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-8 rounded-xl transition interactive-btn inline-block">
+                            Ver Mis Resultados 🏆
+                        </a>
+                    </div>`;
+                
+                const botFinal = document.createElement('div');
+                botFinal.className = "chat-bubble-bot p-4 rounded-2xl max-w-[85%] shadow-sm self-start font-medium animate-pop";
+                botFinal.innerHTML = "Great chatting with you! Keep practicing! 👋";
+                msgs.appendChild(botFinal);
+                msgs.scrollTop = msgs.scrollHeight;
+                return;
+            }
+
+            const data = chatData[chatStep];
+            
+            // Mensaje del Bot
+            const botMsg = document.createElement('div');
+            botMsg.className = "chat-bubble-bot p-4 rounded-2xl max-w-[85%] shadow-sm self-start font-medium animate-pop";
+            botMsg.innerHTML = data.bot;
+            msgs.appendChild(botMsg);
+            msgs.scrollTop = msgs.scrollHeight;
+
+            // Renderizar Opciones de Usuario
+            choicesContainer.innerHTML = data.choices.map((c, i) => `
+                <button onclick="handleChatChoice(${i})" class="w-full text-left bg-white border-2 border-slate-200 p-4 rounded-xl mb-3 hover:bg-cyan-50 hover:border-cyan-400 transition shadow-sm interactive-btn flex flex-col gap-1">
+                    <span class="font-bold text-slate-800 text-lg">${c.text}</span>
+                    <span class="text-xs font-bold text-slate-400"><i class="fas fa-language text-cyan-500 mr-1"></i> ${c.trans}</span>
+                </button>
+            `).join('');
+        }
+
+        window.handleChatChoice = function(choiceIdx) {
+            const data = chatData[chatStep];
+            const choice = data.choices[choiceIdx];
+            const msgs = document.getElementById('chat-messages');
+            const choicesContainer = document.getElementById('chat-choices');
+
+            // Limpiar opciones inmediatamente para evitar doble click
+            choicesContainer.innerHTML = '<div class="text-center py-6 text-slate-400 font-bold animate-pulse">Escribiendo...</div>';
+
+            // Mensaje del Usuario
+            const userMsg = document.createElement('div');
+            userMsg.className = "chat-bubble-user p-4 rounded-2xl max-w-[85%] shadow-md font-medium animate-pop";
+            userMsg.innerHTML = choice.text;
+            msgs.appendChild(userMsg);
+
+            // Validar Correcto/Incorrecto
+            if(choice.correct) {
+                addScore();
+            } else {
+                // Corrección amigable en el chat
+                const correctText = data.choices.find(c => c.correct).text;
+                const correction = document.createElement('div');
+                correction.className = "text-xs font-bold text-rose-500 self-end mt-[-10px] mb-2 mr-2 animate-pop bg-rose-50 px-3 py-1 rounded-full border border-rose-100";
+                correction.innerHTML = `Corrección: ${correctText}`;
+                msgs.appendChild(correction);
+            }
+
+            msgs.scrollTop = msgs.scrollHeight;
+
+            // Retraso para simular respuesta del bot
+            chatStep++;
+            setTimeout(() => {
+                renderChatStep();
+            }, 1200);
+        }
+
+        // --- 6. INICIALIZACIÓN Y EFECTOS DE SCROLL ---
+
+        function initApp() {
+            // Renderizar contenido
+            renderVerbs();
+            buildQuiz('quiz-vocab', quizVocab, 'teal');
+            buildQuiz('quiz-aff', quizAffirmative, 'emerald');
+            buildQuiz('quiz-neg', quizNegative, 'rose');
+            buildQuiz('quiz-q', quizQuestion, 'purple');
+            buildQuiz('quiz-read', quizReading, 'amber');
+            renderChatStep();
+
+            // Configurar Intersection Observer para revelar elementos al hacer scroll
+            const reveals = document.querySelectorAll('.reveal');
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px 0px -10% 0px', // Activa un poco antes de que toque el fondo
+                threshold: 0.1
+            };
+
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        // Opcional: observer.unobserve(entry.target) si solo quieres que se anime una vez
+                    }
+                });
+            }, observerOptions);
+
+            reveals.forEach(reveal => revealObserver.observe(reveal));
+
+            // Configurar Barra de Progreso Superior
+            window.addEventListener('scroll', () => {
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (winScroll / height) * 100;
+                document.getElementById('scroll-progress').style.width = scrolled + "%";
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+
+    </script>
+</body>
+</html>
